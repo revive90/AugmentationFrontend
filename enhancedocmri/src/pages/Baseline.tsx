@@ -102,8 +102,26 @@ const Baseline: React.FunctionComponent = () => {
     margin-bottom: 10px;
     margin-top: 10px;
     border-radius: 10px;
-    background-color: rgba(176, 176, 176, 1);
+    background-color: #162b24;
     drop-shadow: 10px 10px 10px rgba(0, 0, 0, 1.9);
+    justify-content: center;
+    display: flex;
+    align-items: center;
+  `;
+  const TerminalText = styled.textarea`
+    width: 80%;
+    height: 80%;
+    color: #75f97d;
+    font-family: "Cascadia Mono", Courier, monospace;
+    font-size: 1.2em;
+    decoration: none;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    scrollbar-width: 0px;
+    scrollbar-color: transparent transparent;
+    cursor: crosshair;
   `;
 
   return (
@@ -163,7 +181,9 @@ const Baseline: React.FunctionComponent = () => {
             <InputsSection></InputsSection>
             <AugProgressSection></AugProgressSection>
           </InputsProgressContainer>
-          <AugTerminalSection> </AugTerminalSection>
+          <AugTerminalSection>
+            <TerminalText placeholder="Terminal Output" />
+          </AugTerminalSection>
         </MainContentPane>
       </MainPage>
     </>
