@@ -8,12 +8,11 @@ import Baseline from "./pages/Baseline";
 import TrainingProgress from "./pages/TrainingProgress";
 import { useNavigate } from "react-router-dom";
 
-
 function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Baseline />} />
         <Route path="/TrainingEval" element={<TrainingEval />} />
         <Route path="/Enhanced" element={<Enhanced />} />
         <Route path="/AugProgress" element={<AugProgress />} />
