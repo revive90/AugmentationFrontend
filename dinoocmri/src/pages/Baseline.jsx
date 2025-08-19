@@ -10,7 +10,7 @@ import Enhanced from "./Enhanced";
 import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
 
-const Baseline: React.FunctionComponent = () => {
+const Baseline = () => {
   const MainPage = styled.div`
     font-family: "Poppins", sans-serif;
     width: 100%;
@@ -45,7 +45,7 @@ const Baseline: React.FunctionComponent = () => {
     cursor: none;
   `;
   const MenuItem = styled.li`
-    decoration: none;
+    text-decoration: none;
     color: #ffffff;
     list-style: none;
     margin-bottom: 15px;
@@ -212,24 +212,18 @@ const Baseline: React.FunctionComponent = () => {
     cursor: crosshair;
   `;
 
-  // --------  EXECUTIUON LOGIC -----------------------------------------------------
-  interface AugmentationParams {
-    ROOT_DATASET_DIR: string;
-    MAIN_OUTPUT_DIR: string;
-    INITIAL_TH1: number;
-    INITIAL_TH2: number;
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: number;
-  }
+  const [formData, setFormData] =
+    useState <
+    AugmentationParams >
+    {
+      ROOT_DATASET_DIR: "",
+      MAIN_OUTPUT_DIR: "",
+      INITIAL_TH1: 0,
+      INITIAL_TH2: 0,
+      ACCEPTABLE_DIFFERENCE_PERCENTAGE: 0,
+    };
 
-  const [formData, setFormData] = useState<AugmentationParams>({
-    ROOT_DATASET_DIR: "",
-    MAIN_OUTPUT_DIR: "",
-    INITIAL_TH1: 0,
-    INITIAL_TH2: 0,
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: 0,
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -237,7 +231,7 @@ const Baseline: React.FunctionComponent = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // convert numbers here before sending
