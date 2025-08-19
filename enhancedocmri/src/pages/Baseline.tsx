@@ -10,7 +10,7 @@ import Enhanced from "./Enhanced";
 import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
 import {CircularProgress} from "@heroui/progress";
-import { Hourglass, Cpu, CpuIcon } from 'lucide-react';
+import { Hourglass, Cpu, CpuIcon, Loader  } from 'lucide-react';
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
@@ -148,15 +148,15 @@ const MainPage = styled.div`
     align-self: center;
     outline: none;
     height: 40px;
-    margin-top: 15px;
+    margin-top: 40px;
     background-color: #4566ea;
     color: rgba(224, 229, 249, 1);
     border-radius: 10px;
     cursor: pointer;
-    font-family: "Inter", sans-serif;
+    font-family: "Roboto", sans-serif;
     font-size: 1em;
-    font-weight: bold;
-    transition: background-color 0.6s ease-in-out;
+    font-weight: 400;
+    transition: background-color 0.01s ease-in-out;
     &:hover {
       background-color: #107944ff; // Color on hover
     }
@@ -167,18 +167,19 @@ const MainPage = styled.div`
     align-self: center;
     outline: none;
     height: 40px;
-    margin-top: 10px;
+    margin-top: 20PX;
     margin-bottom: 5px;
     background-color: #4566ea;
     color: rgba(224, 229, 249, 1);
     border-radius: 10px;
     cursor: pointer;
-    font-family: "Inter", sans-serif;
+    font-family: "Roboto", sans-serif;
     font-size: 1em;
-    font-weight: bold;
-    transition: background-color 0.6s ease-in-out;
+    font-weight: 400;
+    transition: background-color 0.01s ease-in-out;
     &:hover {
       background-color: #a52222ff; // Color on hover
+      scale: 1.01;
     }
   `;
   //---------------------------------------------------------------------------------------
@@ -470,13 +471,12 @@ const ImageCount = styled.p`
     font-family: "roboto", sans-serif;
     align-self: center;
     `;
-    const MiniProgress = styled.h1`
-    width: 50px; 
-    font-weight: 700;
-    font-family: "roboto", sans-serif;
-    align-self: center;
-    color: #4566ea;
-    margin-top: 0px;
+    const ImgCountLoader = styled(Loader)`
+    width: 25px;
+    height: 25px;
+    color: #8c8d91ff;
+    align-self: center;  
+    margin-bottom: 10px;
     `;
 
 
@@ -716,7 +716,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <AugLowerSectionRight>
                   <ImageCountHeading>New Images Generated</ImageCountHeading>
                   <ImageCount>3500</ImageCount>
-                  <MiniProgress>...</MiniProgress>
+                  <ImgCountLoader/>
                 </AugLowerSectionRight>
               </AugLowerSection>
             </AugProgressSection>
