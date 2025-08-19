@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import "../index.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Routes, Route } from "react-router-dom";
 import Home from "./Home";
@@ -10,6 +10,12 @@ import Enhanced from "./Enhanced";
 import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
 import {CircularProgress} from "@heroui/progress";
+import { Hourglass, Cpu, CpuIcon } from 'lucide-react';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+import '@fontsource/roboto/100.css';
 
 
 const MainPage = styled.div`
@@ -95,9 +101,8 @@ const MainPage = styled.div`
   `;
   const InputsSection = styled.div`
     width: 40%;
-    background-color: #f0f2f5ff;
+    background-color: transparent;
     border-radius: 15px;
-    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
   `;
@@ -178,7 +183,6 @@ const MainPage = styled.div`
   `;
   //---------------------------------------------------------------------------------------
 
-  //background-color: #f0f2f5ff;
   const AugProgressSection = styled.div`
     width: 60%;
     background-color: transparent ;
@@ -210,14 +214,92 @@ const MainPage = styled.div`
   border-radius: 15px;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   `;
+
+  //background-color: #f0f2f5ff;
+  //box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   const AugUpperSectionRight = styled.div`
   width: 40%;
-  height: 100%;
-  background-color: transparent;
+  height: 70%;
+  
   margin-left: 5px;
-  border-radius: 15px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  margin-top: 115px;
+  border-radius: 35px;
+  
+  display: flex;
+  flex-direction: column;
   `;
+  const AugUpperRightHeader = styled.h4`
+    font-size: 1.1em;
+    color: #4566ea;
+      box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    background-color: #dadef0ff;
+    font-style: italic;
+    font-weight: 600;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    margin-top: 10px;
+    justify-content: right;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+  `;
+  const StatusIndicatorBarRunning = styled.div`
+    width: 90%;
+    height: 70px;
+    border-radius: 30px;
+    background-color: #f0f2f5ff; // Green color
+    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    align-self: center;
+    display: flex;
+    flex-direction: row ;
+  `;
+  const StatusIndicatorBarRunningDot = styled.div`
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #75f97d; // Green color
+    margin-left: 40px;
+    align-self: center;
+  `;
+  const StatusIndicatorBarRunningText = styled.p`
+    font-size: 1.1em;
+    color: #909bc9ff;
+    margin-left: 20px;
+    font-family: "Inter", sans-serif;
+    align-self: center;
+  `;
+  const StatusIndicatorBarStopped = styled.div`
+    width: 90%;
+    height: 70px;
+    border-radius: 30px;
+    background-color: #f0f2f5ff; // Green color
+    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    align-self: center;
+    display: flex;
+    flex-direction: row ;
+  `;
+  const StatusIndicatorBarStoppedDot = styled.div`
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: #ff3333ff; // Green color
+    margin-left: 40px;
+    align-self: center;
+  `;
+  const StatusIndicatorBarStoppedText = styled.p`
+    font-size: 1.1em;
+    color: #909bc9ff;
+    margin-left: 20px;
+    font-family: "Inter", sans-serif;
+    align-self: center;
+  `;
+
+
+
     const AugLowerSection = styled.div`
     width: 100%;
     height: 40%;
@@ -229,21 +311,173 @@ const MainPage = styled.div`
     `;
 
     const AugLowerSectionLeft = styled.div`
-  width: 35%;
+  width: 55%;
   height: 100%;
   background-color: transparent;
   border-radius: 15px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   `;
-  const AugLowerSectionRight = styled.div`
-  width: 65%;
-  height: 100%;
-  background-color: transparent;
-  margin-left: 5px;
-  border-radius: 15px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+ const StatusTimerBaseline = styled.div`
+    width: 90%;
+    height: 80px;
+    border-radius: 45px;
+    background-color: #f0f2f5ff; // Green color
+    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    margin-top: 25px;
+    align-self: center;
+    display: flex;
+    flex-direction: row ;
+  `;
+  const TimeLabel = styled.p`
+    font-size: 1em;
+    color: #7f7f7fff;
+    background-color: #dadef0ff;
+    font-style: italic;
+    margin-left: 30px;
+    font-weight: 500;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+  `;
+  const TimerR = styled(Hourglass)`
+    width: 30px;
+    height: 30px;
+    color: #8c8d91ff;
+    margin-left: 40px;
+    align-self: center;  
+    `;
+ 
+  const TimeInSec = styled.p`
+    font-size: 2.0em;
+    color: #222222ff;
+    margin-left: 20px;
+    font-weight: 300;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+  `;
+  const TimeUnits = styled.p`
+    font-size: 1.2em;
+    color: #4566ea;
+    font-style: italic;
+    margin-left: 10px;
+    font-weight: 500;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+  `;
+  const StatusRamBaseline = styled.div`
+    width: 90%;
+    height: 80px;
+    border-radius: 45px;
+    background-color: #f0f2f5ff; // Green color
+    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+    align-self: center;
+    display: flex;
+    flex-direction: row ;
+    
   `;
 
+  const RamLabel = styled.p`
+    font-size: 1em;
+    color: #7f7f7fff;
+    background-color: #dadef0ff;
+    font-style: italic;
+    margin-left: 30px;
+    font-weight: 500;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+  `;
+    const RamR = styled(CpuIcon)`
+    width: 30px;
+    height: 30px;
+    color: #8c8d91ff;
+    margin-left: 40px;
+    align-self: center;  
+    `;
+ 
+  const RamInMB = styled.p`
+    font-size: 2.0em;
+    color: #222222ff;
+    margin-left: 20px;
+    font-weight: 300;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+  `;
+  const RamUnits = styled.p`
+    font-size: 1.2em;
+    color: #4566ea;
+    font-style: italic;
+    margin-left: 10px;
+    font-weight: 500;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    justify-content: right;
+  `;
+  const AugLowerSectionRight = styled.div`
+  width: 45%;
+  height: 78%;
+  background-color: transparent;
+  margin-left: 5px;
+  margin-top: 25px;
+  border-radius: 45px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  `;
+
+const ImageCountHeading = styled.p`
+    font-size: 1.1em;
+    color: #4566ea;
+      box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+    background-color: #dadef0ff;
+    font-style: italic;
+    font-weight: 600;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    margin-top: 10px;
+    justify-content: right;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+  `;
+const ImageCount = styled.p`
+    font-size: 4.5em;
+    margin-top: 15px;
+    margin-bottom: 0px;
+    color: #4566ea;
+    font-weight: 100;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    `;
+    const MiniProgress = styled.h1`
+    width: 50px; 
+    font-weight: 700;
+    font-family: "roboto", sans-serif;
+    align-self: center;
+    color: #4566ea;
+    margin-top: 0px;
+    `;
 
 
   // --------------------------   TERMINAL  -------------------------------
@@ -274,8 +508,15 @@ const MainPage = styled.div`
     scrollbar-color: transparent transparent;
     cursor: crosshair;
   `;
+//
 
+
+//  // --------------------------   TIMER  -------------------------------
 const Baseline: React.FunctionComponent = () => {
+
+  // --- Inside Baseline component ---
+
+
 
   // --------  EXECUTIUON LOGIC -----------------------------------------------------
   interface AugmentationParams {
@@ -442,18 +683,41 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <h3> --------</h3>
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>
-                  <h4>Augmentation Status</h4>
-                  <h4>===================</h4>
-                  <h4>running</h4>
-                  <h4>===================</h4>
-                  <h4>===================</h4>
-                  <h4>Stopped</h4>
-                  <h4>===================</h4>
+                  <AugUpperRightHeader>Status</AugUpperRightHeader>
+                  <StatusIndicatorBarRunning>
+                    <StatusIndicatorBarRunningDot/>
+                    <StatusIndicatorBarRunningText>
+                      Running ...
+                    </StatusIndicatorBarRunningText>
+                  </StatusIndicatorBarRunning>
+                  <StatusIndicatorBarStopped>
+                    <StatusIndicatorBarStoppedDot/>
+                    <StatusIndicatorBarStoppedText>
+                      Stopped ...
+                    </StatusIndicatorBarStoppedText>
+                  </StatusIndicatorBarStopped>
                 </AugUpperSectionRight>
                 </AugUpperSection>
               <AugLowerSection>
-                <AugLowerSectionLeft></AugLowerSectionLeft>
-                <AugLowerSectionRight></AugLowerSectionRight>
+                <AugLowerSectionLeft>
+                  <StatusTimerBaseline>
+                    <TimeLabel>Time Elapsed</TimeLabel>
+                    <TimerR />
+                    <TimeInSec>3500.06</TimeInSec>
+                    <TimeUnits>sec</TimeUnits>
+                  </StatusTimerBaseline>
+                  <StatusRamBaseline>
+                    <RamLabel>RAM Usage</RamLabel>
+                    <RamR />
+                    <RamInMB>3500.06</RamInMB>
+                    <RamUnits>mb</RamUnits>
+                  </StatusRamBaseline>
+                </AugLowerSectionLeft>
+                <AugLowerSectionRight>
+                  <ImageCountHeading>New Images Generated</ImageCountHeading>
+                  <ImageCount>3500</ImageCount>
+                  <MiniProgress>...</MiniProgress>
+                </AugLowerSectionRight>
               </AugLowerSection>
             </AugProgressSection>
           </InputsProgressContainer>
