@@ -9,9 +9,10 @@ import TrainingEval from "./TrainingEval";
 import Enhanced from "./Enhanced";
 import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
+import {CircularProgress} from "@heroui/progress";
 
-const Baseline: React.FunctionComponent = () => {
-  const MainPage = styled.div`
+
+const MainPage = styled.div`
     font-family: "Poppins", sans-serif;
     width: 100%;
     height: 100vh;
@@ -177,13 +178,75 @@ const Baseline: React.FunctionComponent = () => {
   `;
   //---------------------------------------------------------------------------------------
 
+  //background-color: #f0f2f5ff;
   const AugProgressSection = styled.div`
     width: 60%;
-    background-color: #f0f2f5ff;
-    border-radius: 15px;
+    background-color: transparent ;
     margin-left: 10px;
-    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    padding-top: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-bottom: 2px;
+    border-radius: 15px;
   `;
+  const AugUpperSection = styled.div`
+    width: 100%;
+    height: 60%;
+    background-color: transparent;
+    padding-top :5px;
+    padding-right :5px;
+    padding-left :5px;
+    padding-bottom :0px;
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    `;
+  const AugUpperSectionLeft = styled.div`
+  width: 60%;
+  height: 100%;
+  background-color: #f0f2f5ff;
+  border-radius: 15px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  `;
+  const AugUpperSectionRight = styled.div`
+  width: 40%;
+  height: 100%;
+  background-color: transparent;
+  margin-left: 5px;
+  border-radius: 15px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  `;
+    const AugLowerSection = styled.div`
+    width: 100%;
+    height: 40%;
+    background-color: transparent;
+    padding :5px;
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    `;
+
+    const AugLowerSectionLeft = styled.div`
+  width: 35%;
+  height: 100%;
+  background-color: transparent;
+  border-radius: 15px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  `;
+  const AugLowerSectionRight = styled.div`
+  width: 65%;
+  height: 100%;
+  background-color: transparent;
+  margin-left: 5px;
+  border-radius: 15px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  `;
+
+
+
+  // --------------------------   TERMINAL  -------------------------------
   const AugTerminalSection = styled.div`
     width: 100%;
     height: 40%;
@@ -212,6 +275,8 @@ const Baseline: React.FunctionComponent = () => {
     cursor: crosshair;
   `;
 
+const Baseline: React.FunctionComponent = () => {
+
   // --------  EXECUTIUON LOGIC -----------------------------------------------------
   interface AugmentationParams {
     ROOT_DATASET_DIR: string;
@@ -230,38 +295,47 @@ const Baseline: React.FunctionComponent = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value, // always keep as string while typing
+  const { name, value, type } = e.target;
+
+  setFormData((prev) => ({
+    ...prev,
+    [name as keyof AugmentationParams]:
+      type === "number"
+        ? value === "" // allow empty string while typing
+          ? ("" as unknown as number)
+          : Number(value)
+        : value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
 
-    // convert numbers here before sending
-    const payload = { ...formData };
-    for (const key in payload) {
-      if (key.includes("TH") || key.includes("PERCENTAGE")) {
-        payload[key] = Number(payload[key]);
-      }
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    try {
-      const response = await fetch("http://127.0.0.1:8000/run-augmentation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+  // create a copy that's mutable
+  const payload: AugmentationParams = { ...formData };
 
-      const data = await response.json();
-      console.log("Backend response:", data);
-      alert("Augmentation started: " + JSON.stringify(data));
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  };
+  // make sure numbers are actually numbers
+  payload.INITIAL_TH1 = Number(formData.INITIAL_TH1);
+  payload.INITIAL_TH2 = Number(formData.INITIAL_TH2);
+  payload.ACCEPTABLE_DIFFERENCE_PERCENTAGE = Number(
+    formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE
+  );
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/run-augmentation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    console.log("Backend response:", data);
+    alert("Augmentation started: " + JSON.stringify(data));
+  } catch (error) {
+    console.error("Error:", error);
+  }
+};
 
   return (
     <>
@@ -361,7 +435,27 @@ const Baseline: React.FunctionComponent = () => {
               </ProceedButton>
               <StopButton>STOP</StopButton>
             </InputsSection>
-            <AugProgressSection></AugProgressSection>
+            <AugProgressSection>
+              <AugUpperSection>
+                <AugUpperSectionLeft>
+                  <h1> Progress Icon Here</h1>
+                  <h3> --------</h3>
+                </AugUpperSectionLeft>
+                <AugUpperSectionRight>
+                  <h4>Augmentation Status</h4>
+                  <h4>===================</h4>
+                  <h4>running</h4>
+                  <h4>===================</h4>
+                  <h4>===================</h4>
+                  <h4>Stopped</h4>
+                  <h4>===================</h4>
+                </AugUpperSectionRight>
+                </AugUpperSection>
+              <AugLowerSection>
+                <AugLowerSectionLeft></AugLowerSectionLeft>
+                <AugLowerSectionRight></AugLowerSectionRight>
+              </AugLowerSection>
+            </AugProgressSection>
           </InputsProgressContainer>
           <AugTerminalSection>
             <TerminalText placeholder="Terminal Output" />
