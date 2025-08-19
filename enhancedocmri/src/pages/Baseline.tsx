@@ -215,7 +215,7 @@ const MainPage = styled.div`
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   `;
 
-  //background-color: #f0f2f5ff;
+  //background-color: #f0f2f5ff; S
   //box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   const AugUpperSectionRight = styled.div`
   width: 40%;
