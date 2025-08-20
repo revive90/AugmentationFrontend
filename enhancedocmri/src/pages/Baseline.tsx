@@ -14,6 +14,9 @@ import { Flex, Progress } from "antd";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
+import SimpleImageSlider from "react-simple-image-slider";
+import "../images/Tr-no_0130.jpg";
+
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -506,10 +509,11 @@ const AugTerminalSection = styled.div`
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   justify-content: center;
   display: flex;
+  flex-direction: row ;
   align-items: center;
 `;
 const TerminalText = styled.textarea`
-  width: 80%;
+  width: 50%;
   height: 80%;
   color: #75f97d;
   font-family: "Cascadia Mono", Courier, monospace;
@@ -523,6 +527,19 @@ const TerminalText = styled.textarea`
   scrollbar-color: transparent transparent;
   cursor: crosshair;
 `;
+const ImagesPreviewContainer = styled.div`
+  width: 40%;
+  height: 80%;
+  background-color: #f0f2f5ff;
+  border-radius: 8px;
+  justify-content: center;
+  display: flex;
+  flex-direction: row ;
+  align-items: center;
+  `;
+  const Images = styled(SimpleImageSlider)`
+  border-radius: 8px;
+  `;
 //
 
 //  // --------------------------   TIMER  -------------------------------
@@ -587,6 +604,15 @@ const Baseline: React.FunctionComponent = () => {
       console.error("Error:", error);
     }
   };
+
+  // ------------ IMAGE PREVIEW LOGIC -----------------------------------
+ const images = [
+  { url: "Tr-no_0130.jpg" },
+  { url: "/images/Tr-no_0130.jpg" },
+  { url: "/images/Tr-no_0130.jpg" },
+  { url: "/images/Tr-no_0130.jpg" },
+  { url: "/images/Tr-no_0130.jpg" },
+];
 
   return (
     <>
@@ -735,6 +761,18 @@ const Baseline: React.FunctionComponent = () => {
           </InputsProgressContainer>
           <AugTerminalSection>
             <TerminalText placeholder="Terminal Output" />
+            <ImagesPreviewContainer>
+              <Images
+                width={"550px" }
+                height={"280px" }
+                images={images}
+                showBullets={true}
+                showNavs={true}
+                autoPlay={true}
+                autoPlayDelay={2.5}
+                style={{ borderRadius: "8px"}}
+              />
+            </ImagesPreviewContainer>
           </AugTerminalSection>
         </MainContentPane>
       </MainPage>
