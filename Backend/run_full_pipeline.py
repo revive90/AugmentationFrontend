@@ -1,21 +1,24 @@
-# run_full_pipeline.py
-import os
-import shutil
-import faiss
-import numpy as np
-import pickle
-import time
+# run_full_pipeline.py (fixed)
+import os, shutil, pickle, time, json, argparse
 from datetime import datetime
+import numpy as np
 import psutil
-import os
-from feature_extractor import FeatureExtractor
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
+# ---- FAISS import (robust) ----
+try:
+    import faiss  # conda-forge (Linux/macOS) or pip wheels (some envs)
+except ImportError:
+    try:
+        import faiss_cpu as faiss
+    except ImportError:
+        import faiss_gpu as faiss
 
-# --- 1. CONFIGURATION ---
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
+# -------------------- Defaults (CLI can override) --------------------
 ROOT_DATASET_DIR = "../../data/organised_data/Dataset_B/Training"
-INDEX_OUTPUT_DIR = "../../data/augmented_data/Dino/Faiss_Indexes/Dataset_B"
 AUGMENTED_OUTPUT_DIR = "../../data/augmented_data/Dino/Dataset_B/Training"
+INDEX_OUTPUT_DIR = "../../data/augmented_data/Dino/Faiss_Indexes/Dataset_B"
 RESULTS_OUTPUT_DIR = "augmentation_results"
 
 AUGMENTATION_TARGET_PERCENTAGE = 600
@@ -23,146 +26,202 @@ UPPER_THRESHOLD = 0.99
 MINIMUM_QUALITY_THRESHOLD = 0.80
 
 CLASS_TARGETS = {
-    #----- CURRENTLY SET FOR DATASET B -----
-    "glioma_tumor": 20441,  # exact number of augmented images for class1
-    "glioma": 20441,
-    "meningioma_tumor": 11814,  # exact number of augmented images for class1
-    "meningioma": 11814,
-    "no_tumor": 19185,  # exact number of augmented images for class1
-    "notumor": 19185,
-    "pituitary_tumor": 13094,  # exact number of augmented images for class1
-    "pituitary": 13094
-    
+    "glioma_tumor": 20441, "glioma": 20441,
+    "meningioma_tumor": 11814, "meningioma": 11814,
+    "no_tumor": 19185, "notumor": 19185,
+    "pituitary_tumor": 13094, "pituitary": 13094
 }
 
+# -------------------- Project helpers --------------------
+try:
+    from feature_extractor import FeatureExtractor
+except Exception as e:
+    FeatureExtractor = None
 
-# --- 2. New Memory Tracker Class ---
+try:
+    from utils import fuse_images
+except Exception:
+    # fallback fuse
+    import cv2
+    def fuse_images(p1, p2, outp):
+        i1, i2 = cv2.imread(p1), cv2.imread(p2)
+        if i1 is None or i2 is None: return
+        if i1.shape != i2.shape:
+            i2 = cv2.resize(i2, (i1.shape[1], i1.shape[0]))
+        fused = np.zeros_like(i1)
+        for c in range(i1.shape[1]):
+            fused[:, c] = i1[:, c] if (c % 2 == 0) else i2[:, c]
+        cv2.imwrite(outp, fused)
+
+# -------------------- Streaming helpers --------------------
+def emit_event(**kwargs):
+    try:
+        for k, v in list(kwargs.items()):
+            if isinstance(v, float):
+                kwargs[k] = round(v, 4)
+        print("[[EVT]] " + json.dumps(kwargs, ensure_ascii=True), flush=True)
+    except Exception:
+        pass
+
 class MemoryTracker:
     def __init__(self):
         self.process = psutil.Process(os.getpid())
-        self.peak_memory_mb = 0
-        self.track()  # Initial memory usage
-
+        self.peak_memory_mb = 0.0
+        self.track()
     def track(self):
-        # Get current memory usage in MB
-        current_memory_mb = self.process.memory_info().rss / (1024 * 1024)
-        if current_memory_mb > self.peak_memory_mb:
-            self.peak_memory_mb = current_memory_mb
+        cur = self.process.memory_info().rss / (1024 * 1024)
+        if cur > self.peak_memory_mb: self.peak_memory_mb = cur
+    def get_peak(self): return self.peak_memory_mb
 
-    def get_peak_memory(self):
-        return self.peak_memory_mb
+# -------------------- Pair selection logic (fixed) --------------------
+def plan_pairs(embeddings: np.ndarray,
+               upper: float,
+               lower_min: float,
+               target_count: int) -> tuple[float, list[tuple[int,int]]]:
+    """
+    Try to find a lower threshold achieving >= target_count.
+    If not possible, STILL return as many pairs as available
+    between [lower_min, upper) so we generate something.
+    """
+    n = embeddings.shape[0]
+    if n < 2: return lower_min, []
 
+    # cosine similarity
+    norm = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
+    sim = norm @ norm.T
 
-# --- 3. HELPER FUNCTIONS ---
-def find_best_lower_threshold(embeddings: np.ndarray, target_count: int, memory_tracker: MemoryTracker) -> tuple[
-    float, list]:
-    """Pre-calculates similarities and finds the best lower threshold to meet the target."""
-    print(f"  Planning augmentation to meet target of {target_count} images...")
-    num_images = embeddings.shape[0]
-    if num_images < 2: return MINIMUM_QUALITY_THRESHOLD, []
+    iu = np.triu_indices(n, k=1)
+    sims = sim[iu]
+    order = np.argsort(sims)[::-1]  # high → low
+    pairs_sorted = list(zip(iu[0][order], iu[1][order]))
+    sims_sorted = sims[order]
 
-    norm_embeds = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
-    similarity_matrix = norm_embeds @ norm_embeds.T
-    memory_tracker.track()  # Track memory after creating large similarity matrix
-
-    iu = np.triu_indices(num_images, k=1)
-    all_pairs_similarities = np.sort(similarity_matrix[iu])[::-1]
-
-    best_lower_threshold = MINIMUM_QUALITY_THRESHOLD
-    found_pairs = []
-
-    for th in np.arange(UPPER_THRESHOLD - 0.01, MINIMUM_QUALITY_THRESHOLD - 0.01, -0.01):
-        lower_th = round(th, 2)
-        count = np.sum((all_pairs_similarities >= lower_th) & (all_pairs_similarities < UPPER_THRESHOLD))
-        if count >= target_count:
-            best_lower_threshold = lower_th
-            print(f"  Found optimal lower threshold: {best_lower_threshold:.2f} (will generate up to {count} images)")
-            valid_indices = np.where(
-                (similarity_matrix >= best_lower_threshold) & (similarity_matrix < UPPER_THRESHOLD))
-            pairs_set = {tuple(sorted((i, j))) for i, j in zip(*valid_indices) if i != j}
-            sorted_pairs = sorted(list(pairs_set), key=lambda p: similarity_matrix[p[0], p[1]], reverse=True)
-            found_pairs = sorted_pairs[:target_count]
+    # 1) search for a lower thresh producing >= target_count
+    best_lower = lower_min
+    picked: list[tuple[int,int]] = []
+    # scan from just below upper downwards
+    for th in np.arange(upper - 0.01, lower_min - 0.01, -0.01):
+        mask = (sims_sorted >= th) & (sims_sorted < upper)
+        idxs = np.nonzero(mask)[0]
+        if idxs.size >= target_count:
+            best_lower = round(float(th), 2)
+            picked = [pairs_sorted[i] for i in idxs[:target_count]]
             break
 
-    if not found_pairs: print(f"  Warning: Could not meet target. Using lowest threshold {MINIMUM_QUALITY_THRESHOLD}.")
+    # 2) fallback: if we didn't meet target, take all available in [lower_min, upper)
+    if not picked:
+        mask = (sims_sorted >= lower_min) & (sims_sorted < upper)
+        idxs = np.nonzero(mask)[0]
+        picked = [pairs_sorted[i] for i in idxs]
+        # may be empty; that's OK — caller will log + skip
 
-    return best_lower_threshold, found_pairs
+    return best_lower, picked
 
+# -------------------- Main pipeline --------------------
+def main(
+    ROOT_DATASET_DIR: str,
+    AUGMENTED_OUTPUT_DIR: str,
+    UPPER_THRESHOLD: float,
+    MINIMUM_QUALITY_THRESHOLD: float,
+    AUGMENTATION_TARGET_PERCENTAGE: float,
+):
+    if FeatureExtractor is None:
+        raise RuntimeError("feature_extractor.FeatureExtractor is required but could not be imported.")
 
-# --- 4. MAIN WORKFLOW ---
-def main():
-    """Runs the entire pipeline: indexing, augmentation, and results logging."""
-    overall_start_time = time.time()
-    memory_tracker = MemoryTracker()  # Initialize the memory tracker
+    overall_start = time.time()
+    mem = MemoryTracker()
+    emit_event(type="start", dataset_dir=ROOT_DATASET_DIR, output_dir=AUGMENTED_OUTPUT_DIR)
 
-    # --- Setup for logging ---
-    log_lines = []
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    log_filename = f"augmentation_newPipeline_results_{timestamp}.txt"
     os.makedirs(RESULTS_OUTPUT_DIR, exist_ok=True)
-    log_filepath = os.path.join(RESULTS_OUTPUT_DIR, log_filename)
-
-    print("--- Starting Full Augmentation Pipeline ---")
-    log_lines.append("--- OCMRI Enhancement Pipeline: Augmentation Summary ---")
-    log_lines.append(f"Run Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    log_lines.append("=" * 50)
-
-    # --- STAGE 1: OFFLINE INDEXING ---
-    print("\n--- STAGE 1: Starting Offline Indexing ---")
-    if os.path.exists(INDEX_OUTPUT_DIR): shutil.rmtree(INDEX_OUTPUT_DIR)
-
-    feature_extractor = FeatureExtractor()
-    memory_tracker.track()  # Track memory after loading the model
 
     class_dirs = sorted([d.path for d in os.scandir(ROOT_DATASET_DIR) if d.is_dir()])
-    log_lines.append(f"Classes Found: {[os.path.basename(d) for d in class_dirs]}")
+    classes = [os.path.basename(d) for d in class_dirs]
+    print(f"Classes Found: {classes}")
+    if not classes:
+        emit_event(type="done", elapsed_seconds=0, peak_mb=mem.get_peak())
+        return
 
-    for class_dir in class_dirs:
-        class_name = os.path.basename(class_dir)
-        print(f"\nProcessing class: {class_name}")
-        image_paths = [os.path.join(class_dir, f) for f in os.listdir(class_dir) if f.endswith(('.png', '.jpg'))]
-        if not image_paths: continue
-        all_features = [feature_extractor.extract(p) for p in image_paths]
-        memory_tracker.track()  # Track memory after extracting features for a class
-
-        valid_features = [f for f in all_features if f is not None]
-        valid_paths = [p for f, p in zip(all_features, image_paths) if f is not None]
-        if not valid_features: continue
-        features_np = np.array(valid_features).astype('float32')
-        d = features_np.shape[1]
-        index = faiss.IndexFlatL2(d)
-        index.add(features_np)
-        class_index_dir = os.path.join(INDEX_OUTPUT_DIR, class_name)
-        os.makedirs(class_index_dir, exist_ok=True)
-        faiss.write_index(index, os.path.join(class_index_dir, "class.index"))
-        with open(os.path.join(class_index_dir, "index_to_path.pkl"), 'wb') as f:
-            pickle.dump(valid_paths, f)
-
-    indexing_end_time = time.time()
-    indexing_duration = indexing_end_time - overall_start_time
-    print(f"\n--- Offline Indexing Complete. Time taken: {indexing_duration:.2f} seconds. ---")
-    log_lines.append(f"\nIndexing Stage Duration: {indexing_duration:.2f} seconds")
-
-    # --- STAGE 2: ONLINE AUGMENTATION (AUTO-TUNED) ---
-    print("\n--- STAGE 2: Starting Online Augmentation with Auto-Tuning ---")
+    # clean outputs
+    if os.path.exists(INDEX_OUTPUT_DIR): shutil.rmtree(INDEX_OUTPUT_DIR)
     if os.path.exists(AUGMENTED_OUTPUT_DIR): shutil.rmtree(AUGMENTED_OUTPUT_DIR)
 
-    augmentation_results = {}
-    total_images_generated = 0
+    # -------- Stage A: Indexing (40%) --------
+    print("\n--- STAGE 1: Starting Offline Indexing ---")
+    fe = FeatureExtractor()
+    mem.track()
 
-    for class_dir in class_dirs:
+    for idx, class_dir in enumerate(class_dirs):
+        class_name = os.path.basename(class_dir)
+        print(f"\nIndexing class: {class_name}")
+
+        # load images
+        all_paths = [os.path.join(class_dir, f)
+                     for f in os.listdir(class_dir)
+                     if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+        if not all_paths:
+            emit_event(type="overall_progress",
+                      percent=(idx + 1) / len(class_dirs) * 40.0,
+                      phase="index", cls=class_name)
+            continue
+
+        # extract features — keep ONLY valid features + aligned paths
+        feats, paths = [], []
+        for i, p in enumerate(all_paths):
+            vec = fe.extract(p)
+            if vec is not None:
+                feats.append(vec)
+                paths.append(p)
+            if (i + 1) % 50 == 0 or (i + 1) == len(all_paths):
+                mem.track()
+                emit_event(type="heartbeat",
+                           rss_mb=mem.process.memory_info().rss / (1024 * 1024),
+                           peak_mb=mem.get_peak())
+
+        if feats:
+            feats_np = np.asarray(feats, dtype="float32")
+            d = feats_np.shape[1]
+            index = faiss.IndexFlatL2(d)
+            index.add(feats_np)
+
+            class_index_dir = os.path.join(INDEX_OUTPUT_DIR, class_name)
+            os.makedirs(class_index_dir, exist_ok=True)
+            faiss.write_index(index, os.path.join(class_index_dir, "class.index"))
+            with open(os.path.join(class_index_dir, "index_to_path.pkl"), "wb") as f:
+                pickle.dump(paths, f)  # <-- aligned with feats_np
+        else:
+            print(f"  (no valid features for {class_name})")
+
+        emit_event(type="overall_progress",
+                   percent=(idx + 1) / len(class_dirs) * 40.0,
+                   phase="index", cls=class_name)
+
+    index_end = time.time()
+    print(f"\n--- Offline Indexing Complete. Time taken: {index_end - overall_start:.2f} s ---")
+
+    # -------- Stage B: Augmentation (60%) --------
+    # -------- Stage B: Augmentation (60%) --------
+    print("\n--- STAGE 2: Starting Online Augmentation with Auto-Tuning ---")
+    os.makedirs(AUGMENTED_OUTPUT_DIR, exist_ok=True)
+
+    total_generated = 0
+    n_classes = len(class_dirs)
+    slice_per_class = 60.0 / float(n_classes)
+
+    for idx, class_dir in enumerate(class_dirs):
         class_name = os.path.basename(class_dir)
         print(f"\nAugmenting class: {class_name}")
 
         index_file = os.path.join(INDEX_OUTPUT_DIR, class_name, "class.index")
         map_file = os.path.join(INDEX_OUTPUT_DIR, class_name, "index_to_path.pkl")
-        if not os.path.exists(index_file): continue
+        if not (os.path.exists(index_file) and os.path.exists(map_file)):
+            overall_now = 40.0 + (idx + 1) * slice_per_class
+            emit_event(type="overall_progress", percent=overall_now, phase="augment", cls=class_name)
+            continue
 
         index = faiss.read_index(index_file)
-        with open(map_file, 'rb') as f:
+        with open(map_file, "rb") as f:
             image_paths = pickle.load(f)
 
-        # --- Determine augmentation target for this class ---
         if class_name in CLASS_TARGETS:
             target_count = CLASS_TARGETS[class_name]
             print(f"  Using custom target for {class_name}: {target_count} images")
@@ -170,67 +229,97 @@ def main():
             target_count = int(len(image_paths) * (AUGMENTATION_TARGET_PERCENTAGE / 100.0))
             print(f"  Using global target percentage for {class_name}: {target_count} images")
 
-        if target_count == 0: 
+        if index.ntotal == 0 or target_count <= 0:
+            overall_now = 40.0 + (idx + 1) * slice_per_class
+            emit_event(type="overall_progress", percent=overall_now, phase="augment", cls=class_name)
             continue
 
+        embeds = index.reconstruct_n(0, index.ntotal)
+        mem.track()
 
-        all_embeddings = index.reconstruct_n(0, index.ntotal)
-        memory_tracker.track()  # Track memory after loading embeddings
+        lower_th, pairs = plan_pairs(
+            embeddings=embeds,
+            upper=UPPER_THRESHOLD,
+            lower_min=MINIMUM_QUALITY_THRESHOLD,
+            target_count=target_count
+        )
+        print(f"  Planned {len(pairs)} pairs with lower={lower_th:.2f}, upper={UPPER_THRESHOLD:.2f}")
 
-        lower_th, pairs_to_fuse = find_best_lower_threshold(all_embeddings, target_count, memory_tracker)
+        if not pairs:
+            print("  No viable pairs under thresholds — skipping.")
+            overall_now = 40.0 + (idx + 1) * slice_per_class
+            emit_event(type="overall_progress", percent=overall_now, phase="augment", cls=class_name)
+            continue
 
-        class_output_dir = os.path.join(AUGMENTED_OUTPUT_DIR, class_name)
-        os.makedirs(class_output_dir, exist_ok=True)
+        class_out = os.path.join(AUGMENTED_OUTPUT_DIR, class_name)
+        os.makedirs(class_out, exist_ok=True)
 
-        num_fused = len(pairs_to_fuse)
-        print(f"  Fusing {num_fused} pairs...")
-        for i, (idx1, idx2) in enumerate(pairs_to_fuse):
-            path1, path2 = image_paths[idx1], image_paths[idx2]
-            output_path = os.path.join(class_output_dir, f"fused_{class_name}_{i}.png")
-            fuse_images(path1, path2, output_path)
-            if i % 100 == 0: memory_tracker.track()  # Track memory during fusion
+        denom = max(1, len(pairs))
+        for j, (a, b) in enumerate(pairs):
+            p1, p2 = image_paths[a], image_paths[b]
+            outp = os.path.join(class_out, f"fused_{class_name}_{j}.png")
+            fuse_images(p1, p2, outp)
 
-        print(f"  Generated {num_fused} new images.")
-        augmentation_results[class_name] = num_fused
-        total_images_generated += num_fused
+            # 🔥 update global + per-class counts
+            total_generated += 1
+            generated_in_class = j + 1
 
-    overall_end_time = time.time()
-    augmentation_duration = overall_end_time - indexing_end_time
-    total_duration = overall_end_time - overall_start_time
+            # emit immediately for smoother frontend updates
+            emit_event(
+                type="generated",
+                cls=class_name,
+                generated_in_class=generated_in_class,
+                total_generated=total_generated
+            )
 
-    # --- 5. Final Logging ---
-    log_lines.append(f"Augmentation Stage Duration: {augmentation_duration:.2f} seconds")
-    log_lines.append("=" * 50)
-    log_lines.append("\n--- Augmentation Breakdown by Class ---")
-    for class_name, count in augmentation_results.items():
-        log_lines.append(f"  - {class_name}: {count} new images generated")
+            # heartbeat & progress every 50 or at the end
+            if (j + 1) % 50 == 0 or (j + 1) == denom:
+                mem.track()
+                emit_event(
+                    type="heartbeat",
+                    rss_mb=mem.process.memory_info().rss / (1024 * 1024),
+                    peak_mb=mem.get_peak()
+                )
+                class_progress = (j + 1) / float(denom)
+                overall_now = 40.0 + (idx * slice_per_class) + (class_progress * slice_per_class)
+                emit_event(type="overall_progress", percent=overall_now, phase="augment", cls=class_name)
 
-    log_lines.append("\n--- Summary ---")
-    log_lines.append(f"Total New Images Generated: {total_images_generated}")
-    log_lines.append(f"Peak Memory Usage: {memory_tracker.get_peak_memory():.2f} MB")  # Added memory usage
-    log_lines.append(f"Total Execution Time: {total_duration:.2f} seconds")
+        print(f"  Generated {generated_in_class} new images for {class_name}.")
 
-    with open(log_filepath, 'w') as f:
-        f.write('\n'.join(log_lines))
+    overall_end = time.time()
+    total_duration = overall_end - overall_start
 
-    print(f"\n\n--- Full Pipeline Complete ---")
-    print(f"--- Results saved to: '{log_filepath}' ---")
+    # summary file
+    ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    log_filename = f"augmentation_newPipeline_results_{ts}.txt"
+    os.makedirs(RESULTS_OUTPUT_DIR, exist_ok=True)
+    log_path = os.path.join(RESULTS_OUTPUT_DIR, log_filename)
+    with open(log_path, "w") as f:
+        f.write(f"Total New Images Generated: {total_generated}\n")
+        f.write(f"Peak Memory Usage: {mem.get_peak():.2f} MB\n")
+        f.write(f"Total Execution Time: {total_duration:.2f} seconds\n")
+
+    print("\n\n--- Full Pipeline Complete ---")
+    print(f"--- Results saved to: '{log_path}' ---")
     print(f"--- Total execution time: {total_duration:.2f} seconds. ---")
 
+    emit_event(type="overall_progress", percent=100.0)
+    emit_event(type="done", elapsed_seconds=total_duration, peak_mb=mem.get_peak(), summary_path=log_path)
 
+# -------------------- CLI --------------------
 if __name__ == "__main__":
-    try:
-        from feature_extractor import FeatureExtractor
-        from utils import fuse_images
-    except ImportError:
-        print("Warning: Could not import helper files. Using placeholder classes.")
+    p = argparse.ArgumentParser()
+    p.add_argument("--root-dataset-dir", required=False, default=ROOT_DATASET_DIR)
+    p.add_argument("--augmented-output-dir", required=False, default=AUGMENTED_OUTPUT_DIR)
+    p.add_argument("--upper-threshold", type=float, default=UPPER_THRESHOLD)
+    p.add_argument("--minimum-quality-threshold", type=float, default=MINIMUM_QUALITY_THRESHOLD)
+    p.add_argument("--augmentation-target-percentage", type=float, default=AUGMENTATION_TARGET_PERCENTAGE)
+    args = p.parse_args()
 
-
-        class FeatureExtractor:
-            pass
-
-
-        def fuse_images(p1, p2, p3):
-            pass
-
-    main()
+    main(
+        ROOT_DATASET_DIR=args.root_dataset_dir,
+        AUGMENTED_OUTPUT_DIR=args.augmented_output_dir,
+        UPPER_THRESHOLD=args.upper_threshold,
+        MINIMUM_QUALITY_THRESHOLD=args.minimum_quality_threshold,
+        AUGMENTATION_TARGET_PERCENTAGE=args.augmentation_target_percentage,
+    )

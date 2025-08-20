@@ -1,0 +1,3 @@
+Total New Images Generated: 2019
+Peak Memory Usage: 659.01 MB
+Total Execution Time: 272.98 seconds

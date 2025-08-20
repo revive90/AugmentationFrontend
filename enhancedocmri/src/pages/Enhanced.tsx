@@ -1,18 +1,17 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import "../index.css";
+import { Link } from "react-router-dom";
 import Home from "./Home";
 import TrainingEval from "./TrainingEval";
-import AugProgress from "./AugProgress";
 import Baseline from "./Baseline";
+import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
-import { Hourglass, Cpu, CpuIcon, Loader } from "lucide-react";
-import { Flex, Progress } from "antd";
+import { Hourglass, CpuIcon } from "lucide-react";
+import { Progress } from "antd";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
-import LinearProgress from "@mui/material/LinearProgress";
+import SimpleImageSlider from "react-simple-image-slider";
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
@@ -505,9 +504,11 @@ const AugTerminalSection = styled.div`
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   justify-content: center;
   display: flex;
+  flex-direction: row;
   align-items: center;
 `;
-const TerminalText = styled.textarea`
+
+/*const TerminalText = styled.textarea`
   width: 80%;
   height: 80%;
   color: #75f97d;
@@ -521,68 +522,221 @@ const TerminalText = styled.textarea`
   scrollbar-width: 0px;
   scrollbar-color: transparent transparent;
   cursor: crosshair;
+`;*/
+const ImagesPreviewContainer = styled.div`
+  width: 255px;
+  height: 100%;
+  background-color: #000000ff;
+  border-radius: 8px;
+  justify-content: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
-//
+
+const SummaryLinkContainer = styled.div`
+  background-color: #000000ff;
+  margin-left: 8px;
+`;
+
+// ---- keep your styled components as-is above ----
+// (I’m only redefining the small ones I need for TS)
+const TerminalText = styled.textarea`
+  width: 80%;
+  height: 80%;
+  color: #75f97d;
+  font-family: "Cascadia Mono", Courier, monospace;
+  font-size: 1.2em;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+`;
+const Images = styled(SimpleImageSlider)`
+  border-radius: 8px;
+  object-fit: contain;
+`;
 
 const Enhanced: React.FunctionComponent = () => {
-  // --------  EXECUTIUON LOGIC -----------------------------------------------------
-  interface AugmentationParams {
+  // terminal + autoscroll
+  const terminalRef = useRef<HTMLTextAreaElement>(null);
+  const [terminalOutput, setTerminalOutput] = useState<string>("");
+
+  // live metrics
+  const [progressPercent, setProgressPercent] = useState<number>(0); // driven by [[EVT]] overall_progress
+  const [phase, setPhase] = useState<"idle" | "index" | "augment">("idle");
+  const [ramMb, setRamMb] = useState<number>(0);
+  const [imagesGenerated, setImagesGenerated] = useState<number>(0);
+
+  // run state + previews
+  const [isRunning, setIsRunning] = useState(false);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [summaryLink, setSummaryLink] = useState<string>("");
+
+  // timer (live + final)
+  const [elapsedLive, setElapsedLive] = useState<number>(0);
+  const [finalElapsedSec, setFinalElapsedSec] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    setElapsedLive(0);
+    const t = setInterval(() => setElapsedLive((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalOutput]);
+
+  // -------- form state: map to Enhanced args ----------
+  interface EnhancedParams {
     ROOT_DATASET_DIR: string;
-    MAIN_OUTPUT_DIR: string;
-    INITIAL_TH1: number;
-    INITIAL_TH2: number;
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: number;
+    AUGMENTED_OUTPUT_DIR: string;
+    UPPER_THRESHOLD: number | "";
+    MINIMUM_QUALITY_THRESHOLD: number | "";
+    AUGMENTATION_TARGET_PERCENTAGE: number | "";
   }
 
-  const [formData, setFormData] = useState<AugmentationParams>({
+  const [formData, setFormData] = useState<EnhancedParams>({
     ROOT_DATASET_DIR: "",
-    MAIN_OUTPUT_DIR: "",
-    INITIAL_TH1: 0,
-    INITIAL_TH2: 0,
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: 0,
+    AUGMENTED_OUTPUT_DIR: "",
+    UPPER_THRESHOLD: "",
+    MINIMUM_QUALITY_THRESHOLD: "",
+    AUGMENTATION_TARGET_PERCENTAGE: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-
     setFormData((prev) => ({
       ...prev,
-      [name as keyof AugmentationParams]:
-        type === "number"
-          ? value === "" // allow empty string while typing
-            ? ("" as unknown as number)
-            : Number(value)
-          : value,
+      [name as keyof EnhancedParams]:
+        type === "number" ? (value === "" ? "" : Number(value)) : value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // -------------- streaming run -----------------
+  const startStreamingRun = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // create a copy that's mutable
-    const payload: AugmentationParams = { ...formData };
+    setIsRunning(true);
+    setTerminalOutput("");
+    setPreviewImages([]);
+    setSummaryLink("");
+    setPhase("idle");
+    setRamMb(0);
+    setImagesGenerated(0);
+    setFinalElapsedSec(null);
+    setProgressPercent(0);
 
-    // make sure numbers are actually numbers
-    payload.INITIAL_TH1 = Number(formData.INITIAL_TH1);
-    payload.INITIAL_TH2 = Number(formData.INITIAL_TH2);
-    payload.ACCEPTABLE_DIFFERENCE_PERCENTAGE = Number(
-      formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE
-    );
+    const payload = {
+      ROOT_DATASET_DIR: String(formData.ROOT_DATASET_DIR),
+      AUGMENTED_OUTPUT_DIR: String(formData.AUGMENTED_OUTPUT_DIR),
+      UPPER_THRESHOLD: Number(formData.UPPER_THRESHOLD),
+      MINIMUM_QUALITY_THRESHOLD: Number(formData.MINIMUM_QUALITY_THRESHOLD),
+      AUGMENTATION_TARGET_PERCENTAGE: Number(
+        formData.AUGMENTATION_TARGET_PERCENTAGE
+      ),
+    };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/run-augmentation", {
+      const res = await fetch("http://127.0.0.1:8000/augment/enhanced/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-      console.log("Backend response:", data);
-      alert("Augmentation started: " + JSON.stringify(data));
-    } catch (error) {
-      console.error("Error:", error);
+      if (!res.body) {
+        setTerminalOutput("No stream body received.");
+        setIsRunning(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        setTerminalOutput((prev) => prev + chunk);
+
+        buffer += chunk;
+        // process complete lines for [[EVT]] parsing
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, idx).trimEnd();
+          buffer = buffer.slice(idx + 1);
+
+          if (line.startsWith("[[EVT]]")) {
+            const jsonStr = line.slice(7).trim();
+            try {
+              const evt = JSON.parse(jsonStr);
+
+              if (evt.type === "start") setPhase("index");
+
+              if (
+                evt.type === "overall_progress" &&
+                typeof evt.percent === "number"
+              ) {
+                const clamped = Math.max(0, Math.min(100, evt.percent));
+                setProgressPercent(clamped);
+                if (evt.phase === "index" || evt.phase === "augment") {
+                  setPhase(evt.phase);
+                }
+              }
+
+              if (evt.type === "heartbeat" && typeof evt.rss_mb === "number") {
+                setRamMb(evt.rss_mb);
+              }
+
+              if (
+                evt.type === "generated" &&
+                typeof evt.total_generated === "number"
+              ) {
+                setImagesGenerated(evt.total_generated);
+              }
+
+              if (evt.type === "done") {
+                setProgressPercent(100);
+                if (typeof evt.elapsed_seconds === "number")
+                  setFinalElapsedSec(evt.elapsed_seconds);
+                setPhase("idle");
+              }
+            } catch {}
+            continue;
+          }
+
+          if (line.startsWith("[[__DONE__]]")) {
+            const tail = line.slice("[[__DONE__]]".length).trim();
+            try {
+              const parsed = JSON.parse(tail);
+              if (parsed?.done) {
+                if (Array.isArray(parsed.samples))
+                  setPreviewImages(parsed.samples);
+                if (parsed.summary_url) setSummaryLink(parsed.summary_url);
+              }
+            } catch {}
+            continue;
+          }
+        }
+      }
+    } catch (err: any) {
+      setTerminalOutput(
+        (prev) => prev + `\nStream error: ${err?.message || String(err)}`
+      );
+    } finally {
+      setIsRunning(false);
+      setPhase("idle");
+      setFinalElapsedSec((prev) => (prev == null ? elapsedLive : prev));
+      setProgressPercent((p) => (p === 0 ? 100 : p));
     }
   };
+
+  // --------- UI (same layout as your Baseline) ----------
   return (
     <>
       <MainPage>
@@ -590,7 +744,6 @@ const Enhanced: React.FunctionComponent = () => {
           <NavLogo>Enhanced OCMRI</NavLogo>
           <ul>
             <NavSubMenuHeader>AUGMENTATION</NavSubMenuHeader>
-
             <MenuItem>
               <Link
                 to="/Baseline"
@@ -621,7 +774,7 @@ const Enhanced: React.FunctionComponent = () => {
                 to="/TrainingEval"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Training & Evaluation
+                Training &amp; Evaluation
               </Link>
             </MenuItem>
             <MenuItem>
@@ -635,105 +788,193 @@ const Enhanced: React.FunctionComponent = () => {
             <ReloadButton>Reload All</ReloadButton>
           </ul>
         </SideNavMenu>
+
         <MainContentPane>
           <InputsProgressContainer>
             <InputsSection>
               <InputsSectionHeader>
                 Dinov2 + Faiss Augmentation Setup
               </InputsSectionHeader>
-              <InputLabel>Training Data Folder Path</InputLabel>
+
+              <InputLabel>Input Data Directory</InputLabel>
               <InputField
                 type="text"
                 name="ROOT_DATASET_DIR"
                 value={formData.ROOT_DATASET_DIR || ""}
                 onChange={handleChange}
-              ></InputField>
-              <InputLabel>Output Folder Path</InputLabel>
+              />
+
+              <InputLabel>Main Output Directory</InputLabel>
               <InputField
                 type="text"
-                name="MAIN_OUTPUT_DIR"
-                value={formData.MAIN_OUTPUT_DIR || ""}
+                name="AUGMENTED_OUTPUT_DIR"
+                value={formData.AUGMENTED_OUTPUT_DIR || ""}
                 onChange={handleChange}
-              ></InputField>
-              <InputLabel>Lower Threshold (Th1) between 0 and 99</InputLabel>
+              />
+
+              <InputLabel>Upper threshold (0–1)</InputLabel>
               <InputField
                 type="number"
-                name="INITIAL_TH1"
-                value={formData.INITIAL_TH1 || ""}
+                name="UPPER_THRESHOLD"
+                value={formData.UPPER_THRESHOLD}
                 onChange={handleChange}
-              ></InputField>
-              <InputLabel>Upper Threshold (Th2) between 0 and 99</InputLabel>
+                step="0.01"
+                min="0"
+                max="1"
+              />
+
+              <InputLabel>Lower threshold / Min quality (0–1)</InputLabel>
               <InputField
                 type="number"
-                name="INITIAL_TH2"
-                value={formData.INITIAL_TH2 || ""}
+                name="MINIMUM_QUALITY_THRESHOLD"
+                value={formData.MINIMUM_QUALITY_THRESHOLD}
                 onChange={handleChange}
-              ></InputField>
-              <InputLabel>% Target</InputLabel>
+                step="0.01"
+                min="0"
+                max="1"
+              />
+
+              <InputLabel>% Target of data augmentation</InputLabel>
               <InputField
                 type="number"
-                name="ACCEPTABLE_DIFFERENCE_PERCENTAGE"
-                value={formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE || ""}
+                name="AUGMENTATION_TARGET_PERCENTAGE"
+                value={formData.AUGMENTATION_TARGET_PERCENTAGE}
                 onChange={handleChange}
-              ></InputField>
-              <ProceedButton type="submit" onClick={handleSubmit}>
-                START
+              />
+
+              <ProceedButton
+                type="submit"
+                onClick={startStreamingRun}
+                disabled={isRunning}
+              >
+                {isRunning ? "RUNNING..." : "START"}
               </ProceedButton>
               <StopButton>STOP</StopButton>
             </InputsSection>
+
             <AugProgressSection>
               <AugUpperSection>
                 <AugUpperSectionLeft>
                   <AugUpperLeftHeader>Augmentation Progress</AugUpperLeftHeader>
-                  <AugProgressChart type="circle" percent={80} size={180} />
+                  <AugProgressChart
+                    type="circle"
+                    percent={Math.round(progressPercent)}
+                    size={160}
+                  />
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>
                   <AugUpperRightHeader>Status</AugUpperRightHeader>
                   <StatusIndicatorBarRunning>
                     <StatusIndicatorBarRunningDot />
                     <StatusIndicatorBarRunningText>
-                      Running ...
+                      {isRunning
+                        ? phase === "index"
+                          ? "Indexing ..."
+                          : phase === "augment"
+                          ? "Augmenting ..."
+                          : "Running ..."
+                        : "Idle"}
                     </StatusIndicatorBarRunningText>
                   </StatusIndicatorBarRunning>
                   <StatusIndicatorBarStopped>
                     <StatusIndicatorBarStoppedDot />
                     <StatusIndicatorBarStoppedText>
-                      Stopped ...
+                      {isRunning ? "Will stop when done ..." : "Stopped ..."}
                     </StatusIndicatorBarStoppedText>
                   </StatusIndicatorBarStopped>
                 </AugUpperSectionRight>
               </AugUpperSection>
+
               <AugLowerSection>
                 <AugLowerSectionLeft>
                   <StatusTimerBaseline>
                     <TimeLabel>Time Elapsed</TimeLabel>
-                    <TimerR />
-                    <TimeInSec>3500.06</TimeInSec>
+                    <Hourglass />
+                    <TimeInSec>
+                      {isRunning
+                        ? elapsedLive.toFixed(0)
+                        : (finalElapsedSec ?? 0).toFixed(0)}
+                    </TimeInSec>
                     <TimeUnits>sec</TimeUnits>
                   </StatusTimerBaseline>
                   <StatusRamBaseline>
                     <RamLabel>RAM Usage</RamLabel>
-                    <RamR />
-                    <RamInMB>3500.06</RamInMB>
+                    <CpuIcon />
+                    <RamInMB>{ramMb ? ramMb.toFixed(1) : "—"}</RamInMB>
                     <RamUnits>mb</RamUnits>
                   </StatusRamBaseline>
                 </AugLowerSectionLeft>
+
                 <AugLowerSectionRight>
                   <ImageCountHeading>New Images Generated</ImageCountHeading>
-                  <ImageCount>3500</ImageCount>
+                  <ImageCount>{imagesGenerated || "—"}</ImageCount>
                   <Stack spacing={3} direction="row" alignItems="center">
-                    <CircularProgress size="1rem" />
+                    {isRunning && <CircularProgress size="1rem" />}
                   </Stack>
                 </AugLowerSectionRight>
               </AugLowerSection>
             </AugProgressSection>
           </InputsProgressContainer>
+
           <AugTerminalSection>
-            <TerminalText placeholder="Terminal Output" />
+            <TerminalText
+              ref={terminalRef}
+              value={terminalOutput}
+              readOnly
+              placeholder="Terminal Output"
+            />
+
+            <div
+              style={{
+                width: 255,
+                height: "100%",
+                background: "#000",
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {previewImages.length > 0 ? (
+                <Images
+                  width={"250px"}
+                  height={"280px"}
+                  images={previewImages.map((src) => ({
+                    url: `http://127.0.0.1:8000${src}`,
+                  }))}
+                  showBullets
+                  showNavs
+                  autoPlay={false}
+                  style={{ borderRadius: 8 }}
+                />
+              ) : (
+                <p style={{ color: "white", textAlign: "center" }}>
+                  No images yet
+                </p>
+              )}
+            </div>
+
+            <div style={{ background: "#000", marginLeft: 8 }}>
+              {summaryLink && (
+                <a
+                  href={`http://127.0.0.1:8000${summaryLink}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    color: "#75f97d",
+                    marginTop: 10,
+                    textDecoration: "none",
+                  }}
+                >
+                  Augmentation summary
+                </a>
+              )}
+            </div>
           </AugTerminalSection>
         </MainContentPane>
       </MainPage>
     </>
   );
 };
+
 export default Enhanced;

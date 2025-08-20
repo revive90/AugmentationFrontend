@@ -1,29 +1,25 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import "../index.css";
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Home from "./Home";
 import TrainingEval from "./TrainingEval";
 import Enhanced from "./Enhanced";
 import AugProgress from "./AugProgress";
 import TrainingProgress from "./TrainingProgress";
-import { Hourglass, Cpu, CpuIcon, Loader } from "lucide-react";
-import { Flex, Progress } from "antd";
+import { Hourglass, CpuIcon } from "lucide-react";
+import { Progress } from "antd";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
-import LinearProgress from "@mui/material/LinearProgress";
 import SimpleImageSlider from "react-simple-image-slider";
-
 
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/100.css";
-import { Height } from "@mui/icons-material";
 
+// ---------- layout + styled bits (unchanged from yours) ----------
 const MainPage = styled.div`
   font-family: "Poppins", sans-serif;
   width: 100%;
@@ -92,9 +88,6 @@ const MainContentPane = styled.div`
   flex-direction: column;
   padding-right: 10px;
 `;
-//---------------------------------------------------------------------------------------
-
-// Styled components for the inputs and progress section
 
 const InputsProgressContainer = styled.div`
   width: 100%;
@@ -164,7 +157,7 @@ const ProceedButton = styled.button`
   font-weight: 400;
   transition: background-color 0.01s ease-in-out;
   &:hover {
-    background-color: #107944ff; // Color on hover
+    background-color: #107944ff;
   }
 `;
 const StopButton = styled.button`
@@ -184,11 +177,10 @@ const StopButton = styled.button`
   font-weight: 400;
   transition: background-color 0.01s ease-in-out;
   &:hover {
-    background-color: #a52222ff; // Color on hover
+    background-color: #a52222ff;
     scale: 1.01;
   }
 `;
-//---------------------------------------------------------------------------------------
 
 const AugProgressSection = styled.div`
   width: 60%;
@@ -214,8 +206,6 @@ const AugUpperSection = styled.div`
   display: flex;
   flex-direction: row;
 `;
-// background-color: #f0f2f5ff;
-// box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
 const AugUpperSectionLeft = styled.div`
   width: 55%;
   height: 65%;
@@ -241,13 +231,10 @@ const AugUpperLeftHeader = styled.h4`
   padding-bottom: 5px;
   border-radius: 10px;
 `;
-
 const AugProgressChart = styled(Progress)`
   margin-top: 40px;
   align-self: center;
 `;
-//background-color: #f0f2f5ff; S
-//box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
 const AugUpperSectionRight = styled.div`
   width: 40%;
   height: 70%;
@@ -278,7 +265,7 @@ const StatusIndicatorBarRunning = styled.div`
   width: 90%;
   height: 70px;
   border-radius: 30px;
-  background-color: #f0f2f5ff; // Green color
+  background-color: #f0f2f5ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
   margin-top: 30px;
   align-self: center;
@@ -289,7 +276,7 @@ const StatusIndicatorBarRunningDot = styled.div`
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: #75f97d; // Green color
+  background-color: #75f97d;
   margin-left: 40px;
   align-self: center;
 `;
@@ -304,7 +291,7 @@ const StatusIndicatorBarStopped = styled.div`
   width: 90%;
   height: 70px;
   border-radius: 30px;
-  background-color: #f0f2f5ff; // Green color
+  background-color: #f0f2f5ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
   align-self: center;
@@ -315,7 +302,7 @@ const StatusIndicatorBarStoppedDot = styled.div`
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background-color: #ff3333ff; // Green color
+  background-color: #ff3333ff;
   margin-left: 40px;
   align-self: center;
 `;
@@ -336,13 +323,11 @@ const AugLowerSection = styled.div`
   display: flex;
   flex-direction: row;
 `;
-
 const AugLowerSectionLeft = styled.div`
   width: 55%;
   height: 100%;
   background-color: transparent;
   border-radius: 15px;
-
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -351,7 +336,7 @@ const StatusTimerBaseline = styled.div`
   width: 90%;
   height: 80px;
   border-radius: 45px;
-  background-color: #f0f2f5ff; // Green color
+  background-color: #f0f2f5ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
   margin-top: 25px;
   align-self: center;
@@ -381,7 +366,6 @@ const TimerR = styled(Hourglass)`
   margin-left: 40px;
   align-self: center;
 `;
-
 const TimeInSec = styled.p`
   font-size: 2em;
   color: #222222ff;
@@ -405,14 +389,13 @@ const StatusRamBaseline = styled.div`
   width: 90%;
   height: 80px;
   border-radius: 45px;
-  background-color: #f0f2f5ff; // Green color
+  background-color: #f0f2f5ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
   margin-top: 10px;
   align-self: center;
   display: flex;
   flex-direction: row;
 `;
-
 const RamLabel = styled.p`
   font-size: 1em;
   color: #7f7f7fff;
@@ -436,7 +419,6 @@ const RamR = styled(CpuIcon)`
   margin-left: 40px;
   align-self: center;
 `;
-
 const RamInMB = styled.p`
   font-size: 2em;
   color: #222222ff;
@@ -469,7 +451,6 @@ const AugLowerSectionRight = styled.div`
   align-items: center;
   justify-content: center;
 `;
-
 const ImageCountHeading = styled.p`
   font-size: 1.1em;
   color: #4566ea;
@@ -508,7 +489,7 @@ const AugTerminalSection = styled.div`
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   justify-content: center;
   display: flex;
-  flex-direction: row ;
+  flex-direction: row;
   align-items: center;
 `;
 const TerminalText = styled.textarea`
@@ -528,91 +509,210 @@ const TerminalText = styled.textarea`
 `;
 const ImagesPreviewContainer = styled.div`
   width: 255px;
-  height: 80%;
+  height: 100%;
   background-color: #000000ff;
-  border-radius:8px;
+  border-radius: 8px;
   justify-content: center;
   display: flex;
-  flex-direction: row ;
+  flex-direction: row;
   align-items: center;
-  `;
-  const Images = styled(SimpleImageSlider)`
+`;
+const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
   object-fit: contain;
-  `;
-//
+`;
+const SummaryLinkContainer = styled.div`
+  background-color: #000000ff;
+  margin-left: 8px;
+`;
 
-//  // --------------------------   TIMER  -------------------------------
+// --------------------------   COMPONENT  -------------------------------
 const Baseline: React.FunctionComponent = () => {
-  // --- Inside Baseline component ---
+  const terminalRef = useRef<HTMLTextAreaElement>(null);
+  const [terminalOutput, setTerminalOutput] = useState<string>("");
 
-  // --------  EXECUTIUON LOGIC -----------------------------------------------------
+  // live metrics
+  const [progressPercent, setProgressPercent] = useState<number>(0); // now uses overall_progress
+  const [phase, setPhase] = useState<"idle" | "compare" | "fuse">("idle");
+  const [ramMb, setRamMb] = useState<number>(0);
+  const [imagesGenerated, setImagesGenerated] = useState<number>(0);
+
+  // run state + previews
+  const [isRunning, setIsRunning] = useState(false);
+  const [previewImages, setPreviewImages] = useState<string[]>([]);
+  const [summaryLink, setSummaryLink] = useState<string>("");
+
+  // timer (live + final)
+  const [elapsedLive, setElapsedLive] = useState<number>(0);
+  const [finalElapsedSec, setFinalElapsedSec] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isRunning) return;
+    setElapsedLive(0);
+    const t = setInterval(() => setElapsedLive((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [isRunning]);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalOutput]);
+
   interface AugmentationParams {
     ROOT_DATASET_DIR: string;
     MAIN_OUTPUT_DIR: string;
-    INITIAL_TH1: number;
-    INITIAL_TH2: number;
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: number;
+    INITIAL_TH1: number | "";
+    INITIAL_TH2: number | "";
+    ACCEPTABLE_DIFFERENCE_PERCENTAGE: number | "";
   }
 
   const [formData, setFormData] = useState<AugmentationParams>({
     ROOT_DATASET_DIR: "",
     MAIN_OUTPUT_DIR: "",
-    INITIAL_TH1: 0,
-    INITIAL_TH2: 0,
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: 0,
+    INITIAL_TH1: "",
+    INITIAL_TH2: "",
+    ACCEPTABLE_DIFFERENCE_PERCENTAGE: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name as keyof AugmentationParams]:
-        type === "number"
-          ? value === "" // allow empty string while typing
-            ? ("" as unknown as number)
-            : Number(value)
-          : value,
+        type === "number" ? (value === "" ? "" : Number(value)) : value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const startStreamingRun = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // create a copy that's mutable
-    const payload: AugmentationParams = { ...formData };
+    setIsRunning(true);
+    setTerminalOutput("");
+    setPreviewImages([]);
+    setSummaryLink("");
+    setPhase("idle");
+    setRamMb(0);
+    setImagesGenerated(0);
+    setFinalElapsedSec(null);
+    setProgressPercent(0);
 
-    // make sure numbers are actually numbers
-    payload.INITIAL_TH1 = Number(formData.INITIAL_TH1);
-    payload.INITIAL_TH2 = Number(formData.INITIAL_TH2);
-    payload.ACCEPTABLE_DIFFERENCE_PERCENTAGE = Number(
-      formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE
-    );
+    const payload = {
+      ROOT_DATASET_DIR: String(formData.ROOT_DATASET_DIR),
+      MAIN_OUTPUT_DIR: String(formData.MAIN_OUTPUT_DIR),
+      INITIAL_TH1: Number(formData.INITIAL_TH1),
+      INITIAL_TH2: Number(formData.INITIAL_TH2),
+      ACCEPTABLE_DIFFERENCE_PERCENTAGE: Number(
+        formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE
+      ),
+    };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/run-augmentation", {
+      const res = await fetch("http://127.0.0.1:8000/augment/baseline/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
-      console.log("Backend response:", data);
-      alert("Augmentation started: " + JSON.stringify(data));
-    } catch (error) {
-      console.error("Error:", error);
+      if (!res.body) {
+        setTerminalOutput("No stream body received.");
+        setIsRunning(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        setTerminalOutput((prev) => prev + chunk);
+
+        buffer += chunk;
+        let idx: number;
+        while ((idx = buffer.indexOf("\n")) !== -1) {
+          const line = buffer.slice(0, idx).trimEnd();
+          buffer = buffer.slice(idx + 1);
+
+          if (line.startsWith("[[EVT]]")) {
+            const payload = line.slice(7).trim();
+            try {
+              const evt = JSON.parse(payload);
+
+              if (evt.type === "start") {
+                setPhase("compare");
+              }
+
+              // NEW: overall progress drives the ring
+              if (
+                evt.type === "overall_progress" &&
+                typeof evt.percent === "number"
+              ) {
+                const clamped = Math.max(0, Math.min(100, evt.percent));
+                setProgressPercent(clamped);
+              }
+
+              // still keep status, RAM, images
+              if (
+                (evt.type === "compare_progress" ||
+                  evt.type === "fuse_progress") &&
+                evt.phase
+              ) {
+                if (evt.phase === "compare" || evt.phase === "fuse")
+                  setPhase(evt.phase);
+              }
+
+              if (evt.type === "heartbeat") {
+                if (typeof evt.rss_mb === "number") setRamMb(evt.rss_mb);
+              }
+
+              if (evt.type === "generated") {
+                if (typeof evt.generated_so_far === "number") {
+                  setImagesGenerated(evt.generated_so_far);
+                }
+              }
+
+              if (evt.type === "done") {
+                setProgressPercent(100);
+                if (typeof evt.elapsed_seconds === "number") {
+                  setFinalElapsedSec(evt.elapsed_seconds);
+                }
+                setPhase("idle");
+              }
+            } catch {
+              // ignore malformed
+            }
+            continue;
+          }
+
+          if (line.startsWith("[[__DONE__]]")) {
+            const tail = line.slice("[[__DONE__]]".length).trim();
+            try {
+              const parsed = JSON.parse(tail);
+              if (parsed?.done) {
+                if (Array.isArray(parsed.samples))
+                  setPreviewImages(parsed.samples);
+                if (parsed.summary_url) setSummaryLink(parsed.summary_url);
+              }
+            } catch {}
+            continue;
+          }
+        }
+      }
+    } catch (err: any) {
+      setTerminalOutput(
+        (prev) => prev + `\nStream error: ${err?.message || String(err)}`
+      );
+    } finally {
+      setIsRunning(false);
+      setPhase("idle");
+      setFinalElapsedSec((prev) => (prev == null ? elapsedLive : prev));
+      setProgressPercent((p) => (p === 0 ? 100 : p));
     }
   };
-
-  // ------------ IMAGE PREVIEW LOGIC -----------------------------------
- const images = [
-  { url: "/images/Tr-no_0130.jpg" },
-  { url: "/images/Tr-no_0130.jpg" },
-  { url: "/images/Tr-no_0130.jpg" },
-  { url: "/images/Tr-no_0130.jpg" },
-  { url: "/images/Tr-no_0130.jpg" },
-];
 
   return (
     <>
@@ -621,7 +721,6 @@ const Baseline: React.FunctionComponent = () => {
           <NavLogo>Enhanced OCMRI</NavLogo>
           <ul>
             <NavSubMenuHeader>AUGMENTATION</NavSubMenuHeader>
-
             <MenuItem>
               <Link
                 to="/Baseline"
@@ -666,117 +765,178 @@ const Baseline: React.FunctionComponent = () => {
             <ReloadButton>Reload All</ReloadButton>
           </ul>
         </SideNavMenu>
+
         <MainContentPane>
           <InputsProgressContainer>
             <InputsSection>
               <InputsSectionHeader>
                 Baseline Augmentation Setup
               </InputsSectionHeader>
+
               <InputLabel>Training Data Folder Path</InputLabel>
               <InputField
                 type="text"
                 name="ROOT_DATASET_DIR"
                 value={formData.ROOT_DATASET_DIR || ""}
                 onChange={handleChange}
-              ></InputField>
+              />
+
               <InputLabel>Output Folder Path</InputLabel>
               <InputField
                 type="text"
                 name="MAIN_OUTPUT_DIR"
                 value={formData.MAIN_OUTPUT_DIR || ""}
                 onChange={handleChange}
-              ></InputField>
+              />
+
               <InputLabel>Lower Threshold (Th1)</InputLabel>
               <InputField
                 type="number"
                 name="INITIAL_TH1"
-                value={formData.INITIAL_TH1 || ""}
+                value={formData.INITIAL_TH1}
                 onChange={handleChange}
-              ></InputField>
+              />
+
               <InputLabel>Upper Threshold (Th2)</InputLabel>
               <InputField
                 type="number"
                 name="INITIAL_TH2"
-                value={formData.INITIAL_TH2 || ""}
+                value={formData.INITIAL_TH2}
                 onChange={handleChange}
-              ></InputField>
+              />
+
               <InputLabel>% Tolerance</InputLabel>
               <InputField
                 type="number"
                 name="ACCEPTABLE_DIFFERENCE_PERCENTAGE"
-                value={formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE || ""}
+                value={formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE}
                 onChange={handleChange}
-              ></InputField>
-              <ProceedButton type="submit" onClick={handleSubmit}>
-                START
+              />
+
+              <ProceedButton
+                type="submit"
+                onClick={startStreamingRun}
+                disabled={isRunning}
+              >
+                {isRunning ? "RUNNING..." : "START"}
               </ProceedButton>
+
               <StopButton>STOP</StopButton>
             </InputsSection>
+
             <AugProgressSection>
               <AugUpperSection>
                 <AugUpperSectionLeft>
                   <AugUpperLeftHeader>Augmentation Progress</AugUpperLeftHeader>
-                  <AugProgressChart type="circle" percent={80} size={160} />
+                  <AugProgressChart
+                    type="circle"
+                    percent={Math.round(progressPercent)}
+                    size={160}
+                  />
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>
                   <AugUpperRightHeader>Status</AugUpperRightHeader>
                   <StatusIndicatorBarRunning>
                     <StatusIndicatorBarRunningDot />
                     <StatusIndicatorBarRunningText>
-                      Running ...
+                      {isRunning
+                        ? phase === "compare"
+                          ? "Comparing ..."
+                          : phase === "fuse"
+                          ? "Fusing ..."
+                          : "Running ..."
+                        : "Idle"}
                     </StatusIndicatorBarRunningText>
                   </StatusIndicatorBarRunning>
                   <StatusIndicatorBarStopped>
                     <StatusIndicatorBarStoppedDot />
                     <StatusIndicatorBarStoppedText>
-                      Stopped ...
+                      {isRunning ? "Will stop when done ..." : "Stopped ..."}
                     </StatusIndicatorBarStoppedText>
                   </StatusIndicatorBarStopped>
                 </AugUpperSectionRight>
               </AugUpperSection>
+
               <AugLowerSection>
                 <AugLowerSectionLeft>
                   <StatusTimerBaseline>
                     <TimeLabel>Time Elapsed</TimeLabel>
                     <TimerR />
-                    <TimeInSec>3500.06</TimeInSec>
+                    <TimeInSec>
+                      {isRunning
+                        ? elapsedLive.toFixed(0)
+                        : (finalElapsedSec ?? 0).toFixed(0)}
+                    </TimeInSec>
                     <TimeUnits>sec</TimeUnits>
                   </StatusTimerBaseline>
                   <StatusRamBaseline>
                     <RamLabel>RAM Usage</RamLabel>
                     <RamR />
-                    <RamInMB>3500.06</RamInMB>
+                    <RamInMB>{ramMb ? ramMb.toFixed(1) : "—"}</RamInMB>
                     <RamUnits>mb</RamUnits>
                   </StatusRamBaseline>
                 </AugLowerSectionLeft>
+
                 <AugLowerSectionRight>
                   <ImageCountHeading>New Images Generated</ImageCountHeading>
-                  <ImageCount>3500</ImageCount>
+                  <ImageCount>{imagesGenerated || "—"}</ImageCount>
                   <Stack spacing={3} direction="row" alignItems="center">
-                    <CircularProgress size="1rem" />
+                    {isRunning && <CircularProgress size="1rem" />}
                   </Stack>
                 </AugLowerSectionRight>
               </AugLowerSection>
             </AugProgressSection>
           </InputsProgressContainer>
+
           <AugTerminalSection>
-            <TerminalText placeholder="Terminal Output" />
+            <TerminalText
+              ref={terminalRef}
+              value={terminalOutput}
+              readOnly
+              placeholder="Terminal Output"
+            />
+
             <ImagesPreviewContainer>
-              <Images
-                width={"250px" }
-                height={"280px" }
-                images={images}
-                showBullets={true}
-                showNavs={true}
-                autoPlay={false}
-                autoPlayDelay={2.5}
-                style={{ borderRadius: "8px",}}
-              />
+              {previewImages.length > 0 ? (
+                <Images
+                  width={"250px"}
+                  height={"280px"}
+                  images={previewImages.map((src) => ({
+                    url: `http://127.0.0.1:8000${src}`,
+                  }))}
+                  showBullets
+                  showNavs
+                  autoPlay={false}
+                  style={{ borderRadius: 8 }}
+                />
+              ) : (
+                <p style={{ color: "white", textAlign: "center" }}>
+                  No images yet
+                </p>
+              )}
             </ImagesPreviewContainer>
+
+            <SummaryLinkContainer>
+              {summaryLink && (
+                <a
+                  href={`http://127.0.0.1:8000${summaryLink}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    color: "#75f97d",
+                    marginTop: "10px",
+                    textDecoration: "none",
+                  }}
+                >
+                  Augmentation summary
+                </a>
+              )}
+            </SummaryLinkContainer>
           </AugTerminalSection>
         </MainContentPane>
       </MainPage>
     </>
   );
 };
+
 export default Baseline;
