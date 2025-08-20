@@ -530,7 +530,7 @@ const ImagesPreviewContainer = styled.div`
   width: 255px;
   height: 80%;
   background-color: #000000ff;
-  border-radius: 8px;
+  border-radius:8px;
   justify-content: center;
   display: flex;
   flex-direction: row ;
