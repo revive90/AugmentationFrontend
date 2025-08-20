@@ -359,7 +359,7 @@ const TimeLabel = styled.p`
   color: #7f7f7fff;
   background-color: #dadef0ff;
   font-style: italic;
-  margin-left: 30px;
+  margin-left: 15px;
   font-weight: 500;
   font-family: "roboto", sans-serif;
   align-self: center;
@@ -414,7 +414,7 @@ const RamLabel = styled.p`
   color: #7f7f7fff;
   background-color: #dadef0ff;
   font-style: italic;
-  margin-left: 30px;
+  margin-left: 15px;
   font-weight: 500;
   font-family: "roboto", sans-serif;
   align-self: center;
@@ -500,7 +500,7 @@ const AugTerminalSection = styled.div`
   margin-bottom: 10px;
   margin-top: 10px;
   border-radius: 15px;
-  background-color: #162b24;
+  background-color: #000000ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   justify-content: center;
   display: flex;
@@ -530,7 +530,7 @@ const ImagesPreviewContainer = styled.div`
   border-radius: 8px;
   justify-content: center;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
 `;
 
@@ -551,6 +551,8 @@ const TerminalText = styled.textarea`
   border: none;
   outline: none;
   resize: none;
+  scrollbar-width: 0px;
+  scrollbar-color: transparent transparent;
 `;
 const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
@@ -888,8 +890,11 @@ const Enhanced: React.FunctionComponent = () => {
               <AugLowerSection>
                 <AugLowerSectionLeft>
                   <StatusTimerBaseline>
+                    <Hourglass
+                      style={{ alignSelf: "center", marginLeft: "20px" }}
+                    />
                     <TimeLabel>Time Elapsed</TimeLabel>
-                    <Hourglass />
+
                     <TimeInSec>
                       {isRunning
                         ? elapsedLive.toFixed(0)
@@ -898,8 +903,11 @@ const Enhanced: React.FunctionComponent = () => {
                     <TimeUnits>sec</TimeUnits>
                   </StatusTimerBaseline>
                   <StatusRamBaseline>
+                    <CpuIcon
+                      style={{ alignSelf: "center", marginLeft: "25px" }}
+                    />
                     <RamLabel>RAM Usage</RamLabel>
-                    <CpuIcon />
+
                     <RamInMB>{ramMb ? ramMb.toFixed(1) : "—"}</RamInMB>
                     <RamUnits>mb</RamUnits>
                   </StatusRamBaseline>
@@ -924,17 +932,7 @@ const Enhanced: React.FunctionComponent = () => {
               placeholder="Terminal Output"
             />
 
-            <div
-              style={{
-                width: 255,
-                height: "100%",
-                background: "#000",
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+            <ImagesPreviewContainer>
               {previewImages.length > 0 ? (
                 <Images
                   width={"250px"}
@@ -952,9 +950,7 @@ const Enhanced: React.FunctionComponent = () => {
                   No images yet
                 </p>
               )}
-            </div>
 
-            <div style={{ background: "#000", marginLeft: 8 }}>
               {summaryLink && (
                 <a
                   href={`http://127.0.0.1:8000${summaryLink}`}
@@ -969,7 +965,7 @@ const Enhanced: React.FunctionComponent = () => {
                   Augmentation summary
                 </a>
               )}
-            </div>
+            </ImagesPreviewContainer>
           </AugTerminalSection>
         </MainContentPane>
       </MainPage>

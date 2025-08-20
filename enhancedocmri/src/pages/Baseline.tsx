@@ -348,7 +348,7 @@ const TimeLabel = styled.p`
   color: #7f7f7fff;
   background-color: #dadef0ff;
   font-style: italic;
-  margin-left: 30px;
+  margin-left: 15px;
   font-weight: 500;
   font-family: "roboto", sans-serif;
   align-self: center;
@@ -401,7 +401,7 @@ const RamLabel = styled.p`
   color: #7f7f7fff;
   background-color: #dadef0ff;
   font-style: italic;
-  margin-left: 30px;
+  margin-left: 15px;
   font-weight: 500;
   font-family: "roboto", sans-serif;
   align-self: center;
@@ -485,7 +485,7 @@ const AugTerminalSection = styled.div`
   margin-bottom: 10px;
   margin-top: 10px;
   border-radius: 15px;
-  background-color: #162b24;
+  background-color: #000000ff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
   justify-content: center;
   display: flex;
@@ -493,19 +493,17 @@ const AugTerminalSection = styled.div`
   align-items: center;
 `;
 const TerminalText = styled.textarea`
-  width: 60%;
+  width: 80%;
   height: 80%;
   color: #75f97d;
   font-family: "Cascadia Mono", Courier, monospace;
   font-size: 1.2em;
-  decoration: none;
   background-color: transparent;
   border: none;
   outline: none;
   resize: none;
   scrollbar-width: 0px;
   scrollbar-color: transparent transparent;
-  cursor: crosshair;
 `;
 const ImagesPreviewContainer = styled.div`
   width: 255px;
@@ -860,8 +858,11 @@ const Baseline: React.FunctionComponent = () => {
               <AugLowerSection>
                 <AugLowerSectionLeft>
                   <StatusTimerBaseline>
+                    <Hourglass
+                      style={{ alignSelf: "center", marginLeft: "20px" }}
+                    />
                     <TimeLabel>Time Elapsed</TimeLabel>
-                    <TimerR />
+
                     <TimeInSec>
                       {isRunning
                         ? elapsedLive.toFixed(0)
@@ -870,8 +871,11 @@ const Baseline: React.FunctionComponent = () => {
                     <TimeUnits>sec</TimeUnits>
                   </StatusTimerBaseline>
                   <StatusRamBaseline>
+                    <CpuIcon
+                      style={{ alignSelf: "center", marginLeft: "25px" }}
+                    />
                     <RamLabel>RAM Usage</RamLabel>
-                    <RamR />
+
                     <RamInMB>{ramMb ? ramMb.toFixed(1) : "—"}</RamInMB>
                     <RamUnits>mb</RamUnits>
                   </StatusRamBaseline>
