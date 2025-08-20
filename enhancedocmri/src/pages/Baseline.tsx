@@ -15,7 +15,6 @@ import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
 import SimpleImageSlider from "react-simple-image-slider";
-import "../images/Tr-no_0130.jpg";
 
 
 import "@fontsource/roboto/300.css";
@@ -513,7 +512,7 @@ const AugTerminalSection = styled.div`
   align-items: center;
 `;
 const TerminalText = styled.textarea`
-  width: 50%;
+  width: 60%;
   height: 80%;
   color: #75f97d;
   font-family: "Cascadia Mono", Courier, monospace;
@@ -528,9 +527,9 @@ const TerminalText = styled.textarea`
   cursor: crosshair;
 `;
 const ImagesPreviewContainer = styled.div`
-  width: 40%;
+  width: 255px;
   height: 80%;
-  background-color: #f0f2f5ff;
+  background-color: #000000ff;
   border-radius: 8px;
   justify-content: center;
   display: flex;
@@ -539,6 +538,7 @@ const ImagesPreviewContainer = styled.div`
   `;
   const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
+  object-fit: contain;
   `;
 //
 
@@ -607,7 +607,7 @@ const Baseline: React.FunctionComponent = () => {
 
   // ------------ IMAGE PREVIEW LOGIC -----------------------------------
  const images = [
-  { url: "Tr-no_0130.jpg" },
+  { url: "/images/Tr-no_0130.jpg" },
   { url: "/images/Tr-no_0130.jpg" },
   { url: "/images/Tr-no_0130.jpg" },
   { url: "/images/Tr-no_0130.jpg" },
@@ -716,7 +716,7 @@ const Baseline: React.FunctionComponent = () => {
               <AugUpperSection>
                 <AugUpperSectionLeft>
                   <AugUpperLeftHeader>Augmentation Progress</AugUpperLeftHeader>
-                  <AugProgressChart type="circle" percent={80} size={180} />
+                  <AugProgressChart type="circle" percent={80} size={160} />
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>
                   <AugUpperRightHeader>Status</AugUpperRightHeader>
@@ -763,14 +763,14 @@ const Baseline: React.FunctionComponent = () => {
             <TerminalText placeholder="Terminal Output" />
             <ImagesPreviewContainer>
               <Images
-                width={"550px" }
+                width={"250px" }
                 height={"280px" }
                 images={images}
                 showBullets={true}
                 showNavs={true}
-                autoPlay={true}
+                autoPlay={false}
                 autoPlayDelay={2.5}
-                style={{ borderRadius: "8px"}}
+                style={{ borderRadius: "8px",}}
               />
             </ImagesPreviewContainer>
           </AugTerminalSection>
