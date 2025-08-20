@@ -1,3 +1,0 @@
-Total New Images Generated: 0
-Peak Memory Usage: 652.94 MB
-Total Execution Time: 22.08 seconds

@@ -527,11 +527,12 @@ const ImagesPreviewContainer = styled.div`
   width: 255px;
   height: 100%;
   background-color: #000000ff;
-  border-radius: 8px;
+  border-radius: 10px;
   justify-content: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-right: 7px;
 `;
 
 const SummaryLinkContainer = styled.div`
@@ -539,14 +540,13 @@ const SummaryLinkContainer = styled.div`
   margin-left: 8px;
 `;
 
-// ---- keep your styled components as-is above ----
-// (I’m only redefining the small ones I need for TS)
 const TerminalText = styled.textarea`
   width: 80%;
   height: 80%;
   color: #75f97d;
   font-family: "Cascadia Mono", Courier, monospace;
   font-size: 1.2em;
+  margin-left: 40px;
   background-color: transparent;
   border: none;
   outline: none;
@@ -957,9 +957,11 @@ const Enhanced: React.FunctionComponent = () => {
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    color: "#75f97d",
+                    color: "#4566ea",
                     marginTop: 10,
                     textDecoration: "none",
+                    fontStyle: "oblique",
+                    fontWeight: "bold",
                   }}
                 >
                   Augmentation summary

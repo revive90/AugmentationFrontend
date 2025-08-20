@@ -28,17 +28,21 @@ const MainPage = styled.div`
   flex-direction: row;
   background-color: #eaf0f7;
 `;
+//  background-color: #eaf0f7;
+
+//  background-color: #4723da;
+
 const SideNavMenu = styled.div`
   min-width: 250px;
   width: 20%;
-  background-color: #4723da;
+  background-color: #4566ea;
   padding-top: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 10px;
-  border-radius: 15px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  margin: 8px;
+  border-radius: 5px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.3);
 `;
 const NavLogo = styled.h1`
   font-size: 2em;
@@ -91,9 +95,9 @@ const MainContentPane = styled.div`
 
 const InputsProgressContainer = styled.div`
   width: 100%;
-  height: 60%;
+  height: 55%;
   background-color: #eaf0f7;
-  margin-top: 10px;
+  margin-top: 5px;
   border-radius: 10px;
   display: flex;
   flex-direction: row;
@@ -217,7 +221,7 @@ const AugUpperSectionLeft = styled.div`
 const AugUpperLeftHeader = styled.h4`
   font-size: 1.1em;
   color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   background-color: #dadef0ff;
   font-style: italic;
   font-weight: 600;
@@ -232,7 +236,8 @@ const AugUpperLeftHeader = styled.h4`
   border-radius: 10px;
 `;
 const AugProgressChart = styled(Progress)`
-  margin-top: 40px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   align-self: center;
 `;
 const AugUpperSectionRight = styled.div`
@@ -247,7 +252,7 @@ const AugUpperSectionRight = styled.div`
 const AugUpperRightHeader = styled.h4`
   font-size: 1.1em;
   color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   background-color: #dadef0ff;
   font-style: italic;
   font-weight: 600;
@@ -263,10 +268,10 @@ const AugUpperRightHeader = styled.h4`
 `;
 const StatusIndicatorBarRunning = styled.div`
   width: 90%;
-  height: 70px;
-  border-radius: 30px;
+  height: 40px;
+  border-radius: 5px;
   background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.07);
   margin-top: 30px;
   align-self: center;
   display: flex;
@@ -289,10 +294,10 @@ const StatusIndicatorBarRunningText = styled.p`
 `;
 const StatusIndicatorBarStopped = styled.div`
   width: 90%;
-  height: 70px;
-  border-radius: 30px;
+  height: 40px;
+  border-radius: 5px;
   background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.07);
   margin-top: 20px;
   align-self: center;
   display: flex;
@@ -334,10 +339,10 @@ const AugLowerSectionLeft = styled.div`
 `;
 const StatusTimerBaseline = styled.div`
   width: 90%;
-  height: 80px;
-  border-radius: 45px;
-  background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  height: 60px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   margin-top: 25px;
   align-self: center;
   display: flex;
@@ -387,10 +392,10 @@ const TimeUnits = styled.p`
 `;
 const StatusRamBaseline = styled.div`
   width: 90%;
-  height: 80px;
-  border-radius: 45px;
-  background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  height: 60px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   margin-top: 10px;
   align-self: center;
   display: flex;
@@ -440,27 +445,26 @@ const RamUnits = styled.p`
 `;
 const AugLowerSectionRight = styled.div`
   width: 45%;
-  height: 78%;
-  background-color: transparent;
+  height: 65%;
+  background-color: #ffffff;
   margin-left: 5px;
   margin-top: 25px;
-  border-radius: 45px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 `;
 const ImageCountHeading = styled.p`
   font-size: 1.1em;
   color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   background-color: #dadef0ff;
   font-style: italic;
   font-weight: 600;
   font-family: "roboto", sans-serif;
   align-self: center;
-  margin-top: 10px;
+  margin-top: 5px;
   justify-content: right;
   padding-left: 20px;
   padding-right: 20px;
@@ -469,11 +473,11 @@ const ImageCountHeading = styled.p`
   border-radius: 10px;
 `;
 const ImageCount = styled.p`
-  font-size: 4.5em;
-  margin-top: 15px;
+  font-size: 2.7em;
+  margin-top: 5px;
   margin-bottom: 0px;
   color: #4566ea;
-  font-weight: 100;
+  font-weight: 600;
   font-family: "roboto", sans-serif;
   align-self: center;
 `;
@@ -481,39 +485,44 @@ const ImageCount = styled.p`
 // --------------------------   TERMINAL  -------------------------------
 const AugTerminalSection = styled.div`
   width: 100%;
-  height: 40%;
+  height: 45%;
   margin-bottom: 10px;
   margin-top: 10px;
-  border-radius: 15px;
-  background-color: #000000ff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
   justify-content: center;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between;
 `;
 const TerminalText = styled.textarea`
   width: 80%;
   height: 80%;
-  color: #75f97d;
+  color: #6a86f5ff;
   font-family: "Cascadia Mono", Courier, monospace;
   font-size: 1.2em;
   background-color: transparent;
+  margin-left: 40px;
   border: none;
   outline: none;
   resize: none;
   scrollbar-width: 0px;
   scrollbar-color: transparent transparent;
 `;
+//  color: #75f97d;
+
 const ImagesPreviewContainer = styled.div`
-  width: 255px;
-  height: 100%;
+  width: 315px;
+  height: 97%;
   background-color: #000000ff;
-  border-radius: 8px;
+  border-radius: 10px;
   justify-content: center;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
+  margin-right: 7px;
 `;
 const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
@@ -914,28 +923,27 @@ const Baseline: React.FunctionComponent = () => {
                   style={{ borderRadius: 8 }}
                 />
               ) : (
-                <p style={{ color: "white", textAlign: "center" }}>
+                <p style={{ color: "grey", textAlign: "center" }}>
                   No images yet
                 </p>
               )}
-            </ImagesPreviewContainer>
-
-            <SummaryLinkContainer>
               {summaryLink && (
                 <a
                   href={`http://127.0.0.1:8000${summaryLink}`}
                   target="_blank"
                   rel="noreferrer"
                   style={{
-                    color: "#75f97d",
-                    marginTop: "10px",
+                    color: "#4566ea",
+                    marginTop: 10,
                     textDecoration: "none",
+                    fontStyle: "oblique",
+                    fontWeight: "bold",
                   }}
                 >
                   Augmentation summary
                 </a>
               )}
-            </SummaryLinkContainer>
+            </ImagesPreviewContainer>
           </AugTerminalSection>
         </MainContentPane>
       </MainPage>
