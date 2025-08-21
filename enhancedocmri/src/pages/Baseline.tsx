@@ -66,7 +66,7 @@ const MenuItem = styled.li`
   font-size: 1.2em;
   &:hover {
     color: rgb(165, 194, 231);
-    transform: scale(1.25);
+    transform: scale(1.06);
     transition: 0.1s ease-in-out;
   }
 `;
@@ -236,7 +236,7 @@ const AugUpperLeftHeader = styled.h4`
   border-radius: 10px;
 `;
 const AugProgressChart = styled(Progress)`
-  margin-top: 20px;
+  margin-top: 9px;
   margin-bottom: 20px;
   align-self: center;
 `;
@@ -445,11 +445,11 @@ const RamUnits = styled.p`
 `;
 const AugLowerSectionRight = styled.div`
   width: 45%;
-  height: 65%;
+  height: 140px;
   background-color: #ffffff;
   margin-left: 5px;
   margin-top: 25px;
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -742,14 +742,6 @@ const Baseline: React.FunctionComponent = () => {
                 style={{ textDecoration: "none", color: "inherit" }}
               >
                 Enhanced
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/AugProgress"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Status
               </Link>
             </MenuItem>
             <NavSubMenuHeader>MODEL</NavSubMenuHeader>
