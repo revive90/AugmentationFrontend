@@ -2,11 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import "../index.css";
 import { Link } from "react-router-dom";
-import Home from "./Home";
-import TrainingEval from "./TrainingEval";
 import Enhanced from "./Enhanced";
-import AugProgress from "./AugProgress";
-import TrainingProgress from "./TrainingProgress";
+import Readme from "./Readme";
 import { Hourglass, CpuIcon } from "lucide-react";
 import { Progress } from "antd";
 import Stack from "@mui/material/Stack";
@@ -19,7 +16,6 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/100.css";
 
-// ---------- layout + styled bits (unchanged from yours) ----------
 const MainPage = styled.div`
   font-family: "Poppins", sans-serif;
   width: 100%;
@@ -744,24 +740,18 @@ const Baseline: React.FunctionComponent = () => {
                 Enhanced
               </Link>
             </MenuItem>
-            <NavSubMenuHeader>MODEL</NavSubMenuHeader>
+            <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
             <MenuItem>
               <Link
-                to="/TrainingEval"
+                to="/Readme"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Training & Evaluation
+                Readme
               </Link>
             </MenuItem>
-            <MenuItem>
-              <Link
-                to="/TrainingProgress"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Status
-              </Link>
-            </MenuItem>
-            <ReloadButton>Reload All</ReloadButton>
+            <ReloadButton onClick={() => window.location.reload()}>
+              Reload All
+            </ReloadButton>
           </ul>
         </SideNavMenu>
 

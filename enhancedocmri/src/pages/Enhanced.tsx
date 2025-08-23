@@ -2,11 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import "../index.css";
 import { Link } from "react-router-dom";
-import Home from "./Home";
-import TrainingEval from "./TrainingEval";
 import Baseline from "./Baseline";
-import AugProgress from "./AugProgress";
-import TrainingProgress from "./TrainingProgress";
+import Readme from "./Readme";
 import { Hourglass, CpuIcon } from "lucide-react";
 import { Progress } from "antd";
 import Stack from "@mui/material/Stack";
@@ -736,32 +733,18 @@ const Enhanced: React.FunctionComponent = () => {
                 Enhanced
               </Link>
             </MenuItem>
+            <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
             <MenuItem>
               <Link
-                to="/AugProgress"
+                to="/Readme"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Status
+                Readme
               </Link>
             </MenuItem>
-            <NavSubMenuHeader>MODEL</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/TrainingEval"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Training &amp; Evaluation
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/TrainingProgress"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Status
-              </Link>
-            </MenuItem>
-            <ReloadButton>Reload All</ReloadButton>
+            <ReloadButton onClick={() => window.location.reload()}>
+              Reload All
+            </ReloadButton>
           </ul>
         </SideNavMenu>
 
