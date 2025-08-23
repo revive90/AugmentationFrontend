@@ -196,7 +196,7 @@ const Readme: React.FunctionComponent = () => {
                 to="/Readme"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Readme
+                User Manual
               </Link>
             </MenuItem>
             <ReloadButton onClick={() => window.location.reload()}>
