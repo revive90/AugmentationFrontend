@@ -903,7 +903,7 @@ const Enhanced: React.FunctionComponent = () => {
                   style={{ borderRadius: 8 }}
                 />
               ) : (
-                <p style={{ color: "white", textAlign: "center" }}>
+                <p style={{ color: "grey", textAlign: "center" }}>
                   No images yet
                 </p>
               )}
