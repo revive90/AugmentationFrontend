@@ -718,54 +718,52 @@ const Baseline: React.FunctionComponent = () => {
       <MainPage>
         <SideNavMenu>
           <NavLogo>Enhanced OCMRI</NavLogo>
-          <ul>
-            <NavSubMenuHeader>Baseline</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Baseline"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Original OCMRI
-              </Link>
-            </MenuItem>
-            <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Threshold-Based"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Threshold Based
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Target-Percentage"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Target % Based
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Class-Specific"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Class Specific
-              </Link>
-            </MenuItem>
-            <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Readme"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                User Manual
-              </Link>
-            </MenuItem>
-            <ReloadButton onClick={() => window.location.reload()}>
-              Reload All
-            </ReloadButton>
-          </ul>
+          <NavSubMenuHeader>Baseline</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Baseline"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Original OCMRI
+            </Link>
+          </MenuItem>
+          <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Threshold-Based"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Threshold Based
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Target-Percentage"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Target % Based
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Class-Specific"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Class Specific
+            </Link>
+          </MenuItem>
+          <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Readme"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              User Manual
+            </Link>
+          </MenuItem>
+          <ReloadButton onClick={() => window.location.reload()}>
+            Reload All
+          </ReloadButton>
         </SideNavMenu>
 
         <MainContentPane>
@@ -833,7 +831,7 @@ const Baseline: React.FunctionComponent = () => {
                   <AugProgressChart
                     type="circle"
                     percent={Math.round(progressPercent)}
-                    size={160}
+                    size={120}
                   />
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>

@@ -126,14 +126,17 @@ const InputLabel = styled.p`
   color: #7f7f7fff;
   font-family: "Inter", sans-serif;
   margin: 0 0 2px 2px;
+  margin-left: 40px;
+  margin-bottom: 10px;
 `;
 const InputField = styled.input`
-  width: 100%;
+  width: 93%;
   height: 36px;
   outline: none;
-  padding-left: 10px;
   border: none;
   font-size: 1em;
+  margin-left: 25px;
+  margin-bottom: 10px;
   border-radius: 10px;
   color: #7f7f7fff;
   background: #fff;
@@ -618,56 +621,54 @@ const EnhancedClassSpecific: React.FunctionComponent = () => {
       <MainPage>
         <SideNavMenu>
           <NavLogo>Enhanced OCMRI</NavLogo>
-          <ul>
-            <NavSubMenuHeader>Baseline</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Baseline"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Original OCMRI
-              </Link>
-            </MenuItem>
+          <NavSubMenuHeader>Baseline</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Baseline"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Original OCMRI
+            </Link>
+          </MenuItem>
 
-            <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Threshold-Based"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Threshold Based
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Target-Percentage"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Target % Based
-              </Link>
-            </MenuItem>
-            <MenuItem>
-              <Link
-                to="/Enhanced-Class-Specific"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                Class Specific
-              </Link>
-            </MenuItem>
+          <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Threshold-Based"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Threshold Based
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Target-Percentage"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Target % Based
+            </Link>
+          </MenuItem>
+          <MenuItem>
+            <Link
+              to="/Enhanced-Class-Specific"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              Class Specific
+            </Link>
+          </MenuItem>
 
-            <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
-            <MenuItem>
-              <Link
-                to="/Readme"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                User Manual
-              </Link>
-            </MenuItem>
-            <ReloadButton onClick={() => window.location.reload()}>
-              Reload All
-            </ReloadButton>
-          </ul>
+          <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
+          <MenuItem>
+            <Link
+              to="/Readme"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              User Manual
+            </Link>
+          </MenuItem>
+          <ReloadButton onClick={() => window.location.reload()}>
+            Reload All
+          </ReloadButton>
         </SideNavMenu>
 
         <MainContentPane>
@@ -676,25 +677,21 @@ const EnhancedClassSpecific: React.FunctionComponent = () => {
             <InputsSection>
               <InputsSectionHeader>Class-Specific Targets</InputsSectionHeader>
 
-              <FieldBlock>
-                <InputLabel>Input Data Directory</InputLabel>
-                <InputField
-                  type="text"
-                  name="ROOT_DATASET_DIR"
-                  value={formData.ROOT_DATASET_DIR || ""}
-                  onChange={handleChange}
-                />
-              </FieldBlock>
+              <InputLabel>Input Data Directory</InputLabel>
+              <InputField
+                type="text"
+                name="ROOT_DATASET_DIR"
+                value={formData.ROOT_DATASET_DIR || ""}
+                onChange={handleChange}
+              />
 
-              <FieldBlock>
-                <InputLabel>Main Output Directory</InputLabel>
-                <InputField
-                  type="text"
-                  name="AUGMENTED_OUTPUT_DIR"
-                  value={formData.AUGMENTED_OUTPUT_DIR || ""}
-                  onChange={handleChange}
-                />
-              </FieldBlock>
+              <InputLabel>Main Output Directory</InputLabel>
+              <InputField
+                type="text"
+                name="AUGMENTED_OUTPUT_DIR"
+                value={formData.AUGMENTED_OUTPUT_DIR || ""}
+                onChange={handleChange}
+              />
 
               <Row>
                 <ButtonPrimary
@@ -715,14 +712,6 @@ const EnhancedClassSpecific: React.FunctionComponent = () => {
                   style={{ flex: 1 }}
                 >
                   Equalize to Largest
-                </ButtonGhost>
-                <ButtonGhost
-                  type="button"
-                  onClick={clampToAvailable}
-                  disabled={isRunning || classes.length === 0}
-                  style={{ flex: 1 }}
-                >
-                  Clamp to Available
                 </ButtonGhost>
               </Row>
 
