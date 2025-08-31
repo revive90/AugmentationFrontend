@@ -13,9 +13,8 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/100.css";
-import { Height } from "@mui/icons-material";
 
-// ----- styled components -----
+/* ---------- Shell ---------- */
 const MainPage = styled.div`
   font-family: "Poppins", sans-serif;
   width: 100%;
@@ -85,6 +84,7 @@ const MainContentPane = styled.div`
   padding-right: 10px;
 `;
 
+/* ---------- Top half ---------- */
 const InputsProgressContainer = styled.div`
   width: 100%;
   height: 55%;
@@ -93,6 +93,7 @@ const InputsProgressContainer = styled.div`
   border-radius: 10px;
   display: flex;
   flex-direction: row;
+  gap: 10px;
 `;
 const InputsSection = styled.div`
   width: 40%;
@@ -100,413 +101,313 @@ const InputsSection = styled.div`
   border-radius: 15px;
   display: flex;
   flex-direction: column;
+  padding-bottom: 8px;
 `;
 const InputsSectionHeader = styled.h3`
   font-size: 1.2em;
   color: #4566ea;
   background-color: #dadef0ff;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 20px;
-  padding-bottom: 20px;
+  padding: 16px 10px;
   width: 93%;
   border-radius: 10px;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  align-self: center;
+  margin: 10px auto 16px auto;
   box-shadow: 0px 3px 13px 0px rgba(89, 89, 89, 0.1);
 `;
+const FieldBlock = styled.div`
+  width: 93%;
+  margin: 0 auto 10px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
 const InputLabel = styled.p`
-  font-size: 1em;
+  font-size: 0.95em;
   font-weight: 500;
   color: #7f7f7fff;
   font-family: "Inter", sans-serif;
-  margin-top: 10px;
-  margin-bottom: 5px;
-  margin-left: 25px;
+  margin: 0 0 2px 2px;
 `;
 const InputField = styled.input`
-  width: 95%;
-  height: 35px;
+  width: 100%;
+  height: 36px;
   outline: none;
   padding-left: 10px;
   border: none;
-  align-self: center;
   font-size: 1em;
   border-radius: 10px;
   color: #7f7f7fff;
+  background: #fff;
   box-shadow: 0px 3px 13px 0px rgba(89, 89, 89, 0.1);
 `;
-const ProceedButton = styled.button`
-  width: 97%;
-  border: none;
-  align-self: center;
-  outline: none;
-  height: 40px;
-  margin-top: 40px;
+
+const ButtonPrimary = styled.button`
   background-color: #4566ea;
-  color: rgba(224, 229, 249, 1);
+  color: #e0e5f9;
+  border: none;
   border-radius: 10px;
+  height: 38px;
+  padding: 0 14px;
+  font-size: 0.95em;
   cursor: pointer;
   font-family: "Roboto", sans-serif;
-  font-size: 1em;
-  font-weight: 400;
-  transition: background-color 0.01s ease-in-out;
   &:hover {
     background-color: #107944ff;
   }
 `;
-const StopButton = styled.button`
-  width: 97%;
-  border: none;
-  align-self: center;
-  outline: none;
-  height: 40px;
-  margin-top: 20px;
-  margin-bottom: 5px;
+const ButtonGhost = styled(ButtonPrimary)`
   background-color: #4566ea;
-  color: rgba(224, 229, 249, 1);
-  border-radius: 10px;
-  cursor: pointer;
-  font-family: "Roboto", sans-serif;
-  font-size: 1em;
-  font-weight: 400;
-  transition: background-color 0.01s ease-in-out;
   &:hover {
-    background-color: #a52222ff;
-    scale: 1.01;
+    background-color: #3453cf;
   }
+`;
+
+const Row = styled.div`
+  width: 93%;
+  margin: 8px auto 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+const ProceedButton = styled(ButtonPrimary)`
+  width: 93%;
+  margin: 12px auto 0 auto;
+`;
+const StopButton = styled(ButtonGhost)`
+  width: 93%;
+  margin: 10px auto 0 auto;
 `;
 
 const AugProgressSection = styled.div`
   width: 60%;
   background-color: transparent;
-  margin-left: 10px;
+  margin-left: 2px;
   display: flex;
   flex-direction: column;
-  padding-top: 2px;
-  padding-left: 5px;
-  padding-right: 5px;
-  padding-bottom: 2px;
+  padding: 6px 6px 2px 6px;
   border-radius: 15px;
 `;
 const AugUpperSection = styled.div`
   width: 100%;
   height: 60%;
-  background-color: transparent;
-  padding-top: 5px;
-  padding-right: 5px;
-  padding-left: 5px;
-  padding-bottom: 0px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const AugUpperSectionLeft = styled.div`
-  width: 55%;
-  height: 65%;
-  margin-top: 115px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 15px;
-`;
-const AugUpperLeftHeader = styled.h4`
-  font-size: 1.1em;
-  color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
-  background-color: #dadef0ff;
-  font-style: italic;
-  font-weight: 600;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  margin-top: 10px;
-  justify-content: right;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border-radius: 10px;
-`;
-const AugProgressChart = styled(Progress)`
-  margin-top: 9px;
-  margin-bottom: 20px;
-  align-self: center;
-`;
-const AugUpperSectionRight = styled.div`
-  width: 40%;
-  height: 70%;
-  margin-left: 5px;
-  margin-top: 115px;
-  border-radius: 35px;
-  display: flex;
-  flex-direction: column;
-`;
-const AugUpperRightHeader = styled.h4`
-  font-size: 1.1em;
-  color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
-  background-color: #dadef0ff;
-  font-style: italic;
-  font-weight: 600;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  margin-top: 10px;
-  justify-content: right;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border-radius: 10px;
-`;
-const StatusIndicatorBarRunning = styled.div`
-  width: 90%;
-  height: 40px;
-  border-radius: 5px;
-  background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.07);
-  margin-top: 30px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const StatusIndicatorBarRunningDot = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #75f97d;
-  margin-left: 40px;
-  align-self: center;
-`;
-const StatusIndicatorBarRunningText = styled.p`
-  font-size: 1.1em;
-  color: #909bc9ff;
-  margin-left: 20px;
-  font-family: "Inter", sans-serif;
-  align-self: center;
-`;
-const StatusIndicatorBarStopped = styled.div`
-  width: 90%;
-  height: 40px;
-  border-radius: 5px;
-  background-color: #f0f2f5ff;
-  box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.07);
-  margin-top: 20px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const StatusIndicatorBarStoppedDot = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #ff3333ff;
-  margin-left: 40px;
-  align-self: center;
-`;
-const StatusIndicatorBarStoppedText = styled.p`
-  font-size: 1.1em;
-  color: #909bc9ff;
-  margin-left: 20px;
-  font-family: "Inter", sans-serif;
-  align-self: center;
-`;
-
-const AugLowerSection = styled.div`
-  width: 100%;
-  height: 40%;
-  background-color: transparent;
-  padding: 5px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const AugLowerSectionLeft = styled.div`
-  width: 55%;
-  height: 100%;
-  background-color: transparent;
-  border-radius: 15px;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 48% 52%;
   gap: 10px;
 `;
-const StatusTimerBaseline = styled.div`
-  width: 90%;
-  height: 60px;
-  border-radius: 5px;
-  background-color: #ffffff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
-  margin-top: 25px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const TimeLabel = styled.p`
-  font-size: 1em;
-  color: #7f7f7fff;
-  background-color: #dadef0ff;
-  font-style: italic;
-  margin-left: 15px;
-  font-weight: 500;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border-radius: 10px;
-`;
-const TimeInSec = styled.p`
-  font-size: 2em;
-  color: #222222ff;
-  margin-left: 20px;
-  font-weight: 300;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-`;
-const TimeUnits = styled.p`
-  font-size: 1.2em;
-  color: #4566ea;
-  font-style: italic;
-  margin-left: 10px;
-  font-weight: 500;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-`;
-const StatusRamBaseline = styled.div`
-  width: 90%;
-  height: 60px;
-  border-radius: 5px;
-  background-color: #ffffff;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
-  margin-top: 10px;
-  align-self: center;
-  display: flex;
-  flex-direction: row;
-`;
-const RamLabel = styled.p`
-  font-size: 1em;
-  color: #7f7f7fff;
-  background-color: #dadef0ff;
-  font-style: italic;
-  margin-left: 15px;
-  font-weight: 500;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  border-radius: 10px;
-`;
-const RamInMB = styled.p`
-  font-size: 2em;
-  color: #222222ff;
-  margin-left: 20px;
-  font-weight: 300;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-`;
-const RamUnits = styled.p`
-  font-size: 1.2em;
-  color: #4566ea;
-  font-style: italic;
-  margin-left: 10px;
-  font-weight: 500;
-  font-family: "roboto", sans-serif;
-  align-self: center;
-  justify-content: right;
-`;
-const AugLowerSectionRight = styled.div`
-  width: 45%;
-  height: 140px;
-  background-color: #ffffff;
-  margin-left: 5px;
-  margin-top: 25px;
-  border-radius: 5px;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
+const AugUpperSectionLeft = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 `;
-const ImageCountHeading = styled.p`
-  font-size: 1.1em;
+const AugUpperLeftHeader = styled.h4`
+  font-size: 1.05em;
   color: #4566ea;
-  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
   background-color: #dadef0ff;
   font-style: italic;
   font-weight: 600;
   font-family: "roboto", sans-serif;
-  align-self: center;
-  margin-top: 5px;
-  justify-content: right;
-  padding-left: 20px;
-  padding-right: 20px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  margin: 6px auto 8px auto;
+  padding: 5px 14px;
   border-radius: 10px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
 `;
-const ImageCount = styled.p`
-  font-size: 2.7em;
-  margin-top: 5px;
-  margin-bottom: 0px;
-  color: #4566ea;
-  font-weight: 600;
-  font-family: "roboto", sans-serif;
-  align-self: center;
+const AugProgressChart = styled(Progress)`
+  margin-top: 6px;
+`;
+const AugUpperSectionRight = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+const StatCard = styled.div`
+  width: 88%;
+  min-height: 110px;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
+  margin: 6px 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+`;
+const AugUpperRightHeader = styled(AugUpperLeftHeader)`
+  align-self: flex-start;
+`;
+const StatusIndicatorBar = styled.div`
+  width: 88%;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #f0f2f5ff;
+  box-shadow: 0px 3px 3px 0px rgba(0, 0, 0, 0.07);
+  margin: 8px 0 0 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 18px;
+  gap: 12px;
+`;
+const Dot = styled.div<{ color: string }>`
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: ${(p) => p.color};
+`;
+const StatusText = styled.p`
+  font-size: 1.05em;
+  color: #909bc9ff;
+  font-family: "Inter", sans-serif;
 `;
 
-// Terminal & preview
+const TableWrap = styled.div`
+  width: 100%;
+  height: 40%;
+  overflow: auto;
+  padding: 6px;
+  border-radius: 10px;
+`;
+const ClassTable = styled.table`
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-family: "Inter", sans-serif;
+  color: #444;
+  th {
+    text-align: left;
+    color: #4566ea;
+    padding: 6px 10px;
+    font-weight: 600;
+  }
+  td {
+    padding: 8px 10px;
+    background: #fff;
+  }
+  tbody tr {
+    box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
+  }
+  tbody tr td:first-child {
+    border-radius: 10px 0 0 10px;
+  }
+  tbody tr td:last-child {
+    border-radius: 0 10px 10px 0;
+  }
+`;
+
+/* ---------- Bottom half ---------- */
 const AugTerminalSection = styled.div`
   width: 100%;
   height: 45%;
-  margin-bottom: 10px;
-  margin-top: 10px;
+  margin: 10px 0 10px 0;
   border-radius: 5px;
   background-color: #ffffff;
   box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
-  justify-content: center;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 315px;
+  gap: 10px;
+  align-items: stretch;
 `;
 const TerminalText = styled.textarea`
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
   color: #6a86f5ff;
   font-family: "Cascadia Mono", Courier, monospace;
-  font-size: 1.2em;
+  font-size: 1.1em;
   background-color: transparent;
-  margin-left: 40px;
   border: none;
   outline: none;
   resize: none;
-  scrollbar-width: 0px;
-  scrollbar-color: transparent transparent;
+  padding: 12px 16px;
 `;
 const ImagesPreviewContainer = styled.div`
-  width: 315px;
   height: 97%;
-  background-color: #000000ff;
+  background-color: #000;
   border-radius: 10px;
-  justify-content: center;
+  margin: 6px 8px 6px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-right: 7px;
+  justify-content: center;
 `;
 const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
   object-fit: contain;
 `;
 
-// -------------------------- component -------------------------------
-const Enhanced: React.FunctionComponent = () => {
+const ImageCountHeading = styled.p`
+  font-size: 1.1em;
+  color: #4566ea;
+  background-color: #dadef0ff;
+  font-style: italic;
+  font-weight: 600;
+  font-family: "roboto", sans-serif;
+  margin: 5px auto 0 auto;
+  padding: 5px 20px;
+  border-radius: 10px;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
+`;
+const ImageCount = styled.p`
+  font-size: 2.7em;
+  margin-top: 6px;
+  margin-bottom: 0;
+  color: #4566ea;
+  font-weight: 600;
+  font-family: "roboto", sans-serif;
+  text-align: center;
+`;
+// --- Left-side stat tiles (under buttons)
+const StatTile = styled.div`
+  width: 93%;
+  height: 60px;
+  border-radius: 5px;
+  background-color: #ffffff;
+  box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.05);
+  margin: 10px auto 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+`;
+
+const Pill = styled.span`
+  font-size: 0.95em;
+  color: #7f7f7f;
+  background-color: #dadef0ff;
+  font-style: italic;
+  font-weight: 500;
+  font-family: "roboto", sans-serif;
+  padding: 4px 12px;
+  border-radius: 10px;
+`;
+
+const StatValue = styled.span`
+  font-size: 2em;
+  color: #222222ff;
+  font-weight: 300;
+  font-family: "roboto", sans-serif;
+  margin-left: 6px;
+`;
+
+const StatUnits = styled.span`
+  font-size: 1.1em;
+  color: #4566ea;
+  font-style: italic;
+  font-weight: 500;
+  margin-left: 8px;
+`;
+
+/* ---------- Types ---------- */
+type ClassRow = {
+  name: string;
+  imageCount: number;
+  target: number;
+  available?: number;
+  shortfall?: number;
+};
+
+/* ---------- Component ---------- */
+const EnhancedClassSpecific: React.FunctionComponent = () => {
   // terminal + autoscroll
   const terminalRef = useRef<HTMLTextAreaElement>(null);
   const [terminalOutput, setTerminalOutput] = useState<string>("");
@@ -526,6 +427,9 @@ const Enhanced: React.FunctionComponent = () => {
   const [elapsedLive, setElapsedLive] = useState<number>(0);
   const [finalElapsedSec, setFinalElapsedSec] = useState<number | null>(null);
 
+  // class rows
+  const [classes, setClasses] = useState<ClassRow[]>([]);
+
   useEffect(() => {
     if (!isRunning) return;
     setElapsedLive(0);
@@ -539,33 +443,57 @@ const Enhanced: React.FunctionComponent = () => {
     }
   }, [terminalOutput]);
 
-  // -------- form state: THRESHOLD MODE ----------
-  interface ThresholdParams {
+  // -------- form (no thresholds) ----------
+  interface FormParams {
     ROOT_DATASET_DIR: string;
     AUGMENTED_OUTPUT_DIR: string;
-    UPPER_THRESHOLD: number | "";
-    LOWER_THRESHOLD: number | "";
   }
-
-  const [formData, setFormData] = useState<ThresholdParams>({
+  const [formData, setFormData] = useState<FormParams>({
     ROOT_DATASET_DIR: "",
     AUGMENTED_OUTPUT_DIR: "",
-    UPPER_THRESHOLD: 0.99,
-    LOWER_THRESHOLD: 0.8,
   });
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name as keyof ThresholdParams]:
-        type === "number" ? (value === "" ? "" : Number(value)) : value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name as keyof FormParams]: value }));
   };
 
-  // -------------- streaming run (threshold mode) -----------------
+  // -------- scan classes ----------
+  const scanClasses = async () => {
+    if (!formData.ROOT_DATASET_DIR) return;
+    const url = new URL("http://127.0.0.1:8000/datasets/scan-classes");
+    url.searchParams.set("root", String(formData.ROOT_DATASET_DIR));
+    const res = await fetch(url.toString());
+    const data = await res.json();
+    const rows: ClassRow[] =
+      (data?.classes || []).map((c: any) => ({
+        name: c.name,
+        imageCount: Number(c.image_count || 0),
+        target: 0,
+      })) || [];
+    setClasses(rows);
+  };
+
+  const equalizeToLargest = () => {
+    const maxSize = classes.reduce((m, r) => Math.max(m, r.imageCount), 0);
+    setClasses((rows) => rows.map((r) => ({ ...r, target: maxSize })));
+  };
+  const clampToAvailable = () => {
+    setClasses((rows) =>
+      rows.map((r) =>
+        r.available != null
+          ? { ...r, target: Math.min(r.target, r.available) }
+          : r
+      )
+    );
+  };
+
+  // -------- run (stream) ----------
   const startStreamingRun = async (e: React.FormEvent) => {
     e.preventDefault();
+    const targetMap: Record<string, number> = {};
+    classes.forEach((r) => {
+      if (r.target > 0) targetMap[r.name] = r.target;
+    });
 
     setIsRunning(true);
     setTerminalOutput("");
@@ -580,17 +508,18 @@ const Enhanced: React.FunctionComponent = () => {
     const payload = {
       ROOT_DATASET_DIR: String(formData.ROOT_DATASET_DIR),
       AUGMENTED_OUTPUT_DIR: String(formData.AUGMENTED_OUTPUT_DIR),
-      LOWER_THRESHOLD: Number(formData.LOWER_THRESHOLD),
-      UPPER_THRESHOLD: Number(formData.UPPER_THRESHOLD),
+      CLASS_TARGETS_JSON: JSON.stringify(targetMap),
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/augment/enhanced/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
+      const res = await fetch(
+        "http://127.0.0.1:8000/augment/enhanced/class-specific/stream",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       if (!res.body) {
         setTerminalOutput("No stream body received.");
         setIsRunning(false);
@@ -607,8 +536,8 @@ const Enhanced: React.FunctionComponent = () => {
 
         const chunk = decoder.decode(value, { stream: true });
         setTerminalOutput((prev) => prev + chunk);
-
         buffer += chunk;
+
         let idx: number;
         while ((idx = buffer.indexOf("\n")) !== -1) {
           const line = buffer.slice(0, idx).trimEnd();
@@ -618,31 +547,23 @@ const Enhanced: React.FunctionComponent = () => {
             const jsonStr = line.slice(7).trim();
             try {
               const evt = JSON.parse(jsonStr);
-
               if (evt.type === "start") setPhase("index");
-
               if (
                 evt.type === "overall_progress" &&
                 typeof evt.percent === "number"
               ) {
                 const clamped = Math.max(0, Math.min(100, evt.percent));
                 setProgressPercent(clamped);
-                if (evt.phase === "index" || evt.phase === "augment") {
+                if (evt.phase === "index" || evt.phase === "augment")
                   setPhase(evt.phase);
-                }
               }
-
-              if (evt.type === "heartbeat" && typeof evt.rss_mb === "number") {
+              if (evt.type === "heartbeat" && typeof evt.rss_mb === "number")
                 setRamMb(evt.rss_mb);
-              }
-
               if (
                 evt.type === "generated" &&
                 typeof evt.total_generated === "number"
-              ) {
+              )
                 setImagesGenerated(evt.total_generated);
-              }
-
               if (evt.type === "done") {
                 setProgressPercent(100);
                 if (typeof evt.elapsed_seconds === "number")
@@ -661,9 +582,8 @@ const Enhanced: React.FunctionComponent = () => {
                 if (Array.isArray(parsed.samples))
                   setPreviewImages(parsed.samples);
                 if (parsed.summary_url) setSummaryLink(parsed.summary_url);
-                if (typeof parsed.total_generated === "number") {
+                if (typeof parsed.total_generated === "number")
                   setImagesGenerated(parsed.total_generated);
-                }
               }
             } catch {}
             continue;
@@ -682,6 +602,17 @@ const Enhanced: React.FunctionComponent = () => {
     }
   };
 
+  // -------- table helpers --------
+  const setRowTarget = (name: string, val: number) => {
+    setClasses((rows) =>
+      rows.map((r) =>
+        r.name === name
+          ? { ...r, target: Math.max(0, Math.floor(val || 0)) }
+          : r
+      )
+    );
+  };
+
   return (
     <>
       <MainPage>
@@ -697,6 +628,7 @@ const Enhanced: React.FunctionComponent = () => {
                 Original OCMRI
               </Link>
             </MenuItem>
+
             <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
             <MenuItem>
               <Link
@@ -722,6 +654,7 @@ const Enhanced: React.FunctionComponent = () => {
                 Class Specific
               </Link>
             </MenuItem>
+
             <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
             <MenuItem>
               <Link
@@ -739,59 +672,94 @@ const Enhanced: React.FunctionComponent = () => {
 
         <MainContentPane>
           <InputsProgressContainer>
+            {/* LEFT: Controls */}
             <InputsSection>
-              <InputsSectionHeader>
-                DINOv2 + FAISS Augmentation (Threshold Mode)
-              </InputsSectionHeader>
+              <InputsSectionHeader>Class-Specific Targets</InputsSectionHeader>
 
-              <InputLabel>Input Data Directory</InputLabel>
-              <InputField
-                type="text"
-                name="ROOT_DATASET_DIR"
-                value={formData.ROOT_DATASET_DIR || ""}
-                onChange={handleChange}
-              />
+              <FieldBlock>
+                <InputLabel>Input Data Directory</InputLabel>
+                <InputField
+                  type="text"
+                  name="ROOT_DATASET_DIR"
+                  value={formData.ROOT_DATASET_DIR || ""}
+                  onChange={handleChange}
+                />
+              </FieldBlock>
 
-              <InputLabel>Main Output Directory</InputLabel>
-              <InputField
-                type="text"
-                name="AUGMENTED_OUTPUT_DIR"
-                value={formData.AUGMENTED_OUTPUT_DIR || ""}
-                onChange={handleChange}
-              />
+              <FieldBlock>
+                <InputLabel>Main Output Directory</InputLabel>
+                <InputField
+                  type="text"
+                  name="AUGMENTED_OUTPUT_DIR"
+                  value={formData.AUGMENTED_OUTPUT_DIR || ""}
+                  onChange={handleChange}
+                />
+              </FieldBlock>
 
-              <InputLabel>Upper threshold (0–1)</InputLabel>
-              <InputField
-                type="number"
-                name="UPPER_THRESHOLD"
-                value={formData.UPPER_THRESHOLD}
-                onChange={handleChange}
-                step="0.01"
-                min="0"
-                max="1"
-              />
+              <Row>
+                <ButtonPrimary
+                  type="button"
+                  onClick={scanClasses}
+                  disabled={isRunning}
+                  style={{ flex: 1 }}
+                >
+                  Scan Classes
+                </ButtonPrimary>
+              </Row>
 
-              <InputLabel>Lower threshold (0–1)</InputLabel>
-              <InputField
-                type="number"
-                name="LOWER_THRESHOLD"
-                value={formData.LOWER_THRESHOLD}
-                onChange={handleChange}
-                step="0.01"
-                min="0"
-                max="1"
-              />
+              <Row>
+                <ButtonGhost
+                  type="button"
+                  onClick={equalizeToLargest}
+                  disabled={isRunning || classes.length === 0}
+                  style={{ flex: 1 }}
+                >
+                  Equalize to Largest
+                </ButtonGhost>
+                <ButtonGhost
+                  type="button"
+                  onClick={clampToAvailable}
+                  disabled={isRunning || classes.length === 0}
+                  style={{ flex: 1 }}
+                >
+                  Clamp to Available
+                </ButtonGhost>
+              </Row>
 
               <ProceedButton
                 type="submit"
                 onClick={startStreamingRun}
-                disabled={isRunning}
+                disabled={isRunning || classes.length === 0}
               >
                 {isRunning ? "RUNNING..." : "START"}
               </ProceedButton>
-              <StopButton>STOP</StopButton>
+              <StopButton disabled>STOP</StopButton>
+              {/* Time elapsed */}
+              <StatTile>
+                <Hourglass
+                  style={{ width: 22, height: 22, color: "#8c8d91ff" }}
+                />
+                <Pill>Time Elapsed</Pill>
+                <StatValue>
+                  {isRunning
+                    ? elapsedLive.toFixed(0)
+                    : (finalElapsedSec ?? 0).toFixed(0)}
+                </StatValue>
+                <StatUnits>sec</StatUnits>
+              </StatTile>
+
+              {/* RAM usage */}
+              <StatTile>
+                <CpuIcon
+                  style={{ width: 22, height: 22, color: "#8c8d91ff" }}
+                />
+                <Pill>RAM Usage</Pill>
+                <StatValue>{ramMb ? ramMb.toFixed(1) : "—"}</StatValue>
+                <StatUnits>mb</StatUnits>
+              </StatTile>
             </InputsSection>
 
+            {/* RIGHT: Progress + Status + Table */}
             <AugProgressSection>
               <AugUpperSection>
                 <AugUpperSectionLeft>
@@ -802,11 +770,35 @@ const Enhanced: React.FunctionComponent = () => {
                     size={120}
                   />
                 </AugUpperSectionLeft>
+
                 <AugUpperSectionRight>
+                  {/* counter FIRST */}
+                  <StatCard>
+                    <ImageCountHeading
+                      style={{ boxShadow: "none", background: "#eaf0f7" }}
+                    >
+                      New Images Generated
+                    </ImageCountHeading>
+                    <ImageCount style={{ marginTop: 4 }}>
+                      {imagesGenerated ?? "—"}
+                    </ImageCount>
+                    {isRunning && (
+                      <Stack
+                        spacing={2}
+                        direction="row"
+                        alignItems="center"
+                        style={{ marginTop: 6 }}
+                      >
+                        <CircularProgress size="1rem" />
+                      </Stack>
+                    )}
+                  </StatCard>
+
+                  {/* status SECOND */}
                   <AugUpperRightHeader>Status</AugUpperRightHeader>
-                  <StatusIndicatorBarRunning>
-                    <StatusIndicatorBarRunningDot />
-                    <StatusIndicatorBarRunningText>
+                  <StatusIndicatorBar>
+                    <Dot color="#75f97d" />
+                    <StatusText>
                       {isRunning
                         ? phase === "index"
                           ? "Indexing ..."
@@ -814,52 +806,77 @@ const Enhanced: React.FunctionComponent = () => {
                           ? "Augmenting ..."
                           : "Running ..."
                         : "Idle"}
-                    </StatusIndicatorBarRunningText>
-                  </StatusIndicatorBarRunning>
-                  <StatusIndicatorBarStopped>
-                    <StatusIndicatorBarStoppedDot />
-                    <StatusIndicatorBarStoppedText>
+                    </StatusText>
+                  </StatusIndicatorBar>
+                  <StatusIndicatorBar>
+                    <Dot color="#ff3333" />
+                    <StatusText>
                       {isRunning ? "Will stop when done ..." : "Stopped ..."}
-                    </StatusIndicatorBarStoppedText>
-                  </StatusIndicatorBarStopped>
+                    </StatusText>
+                  </StatusIndicatorBar>
                 </AugUpperSectionRight>
               </AugUpperSection>
 
-              <AugLowerSection>
-                <AugLowerSectionLeft>
-                  <StatusTimerBaseline>
-                    <Hourglass
-                      style={{ alignSelf: "center", marginLeft: "20px" }}
-                    />
-                    <TimeLabel>Time Elapsed</TimeLabel>
-
-                    <TimeInSec>
-                      {isRunning
-                        ? elapsedLive.toFixed(0)
-                        : (finalElapsedSec ?? 0).toFixed(0)}
-                    </TimeInSec>
-                    <TimeUnits>sec</TimeUnits>
-                  </StatusTimerBaseline>
-                  <StatusRamBaseline>
-                    <CpuIcon
-                      style={{ alignSelf: "center", marginLeft: "25px" }}
-                    />
-                    <RamLabel>RAM Usage</RamLabel>
-
-                    <RamInMB>{ramMb ? ramMb.toFixed(1) : "—"}</RamInMB>
-                    <RamUnits>mb</RamUnits>
-                  </StatusRamBaseline>
-                </AugLowerSectionLeft>
-
-                <AugLowerSectionRight>
-                  <ImageCountHeading>New Images Generated</ImageCountHeading>
-                  <ImageCount>{imagesGenerated ?? "—"}</ImageCount>
-
-                  <Stack spacing={3} direction="row" alignItems="center">
-                    {isRunning && <CircularProgress size="1rem" />}
-                  </Stack>
-                </AugLowerSectionRight>
-              </AugLowerSection>
+              <TableWrap>
+                <ClassTable>
+                  <thead>
+                    <tr>
+                      <th>Class</th>
+                      <th># Images</th>
+                      <th>Target (count)</th>
+                      <th>Available in band</th>
+                      <th>Shortfall</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {classes.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} style={{ padding: 10, color: "#888" }}>
+                          Click “Scan Classes” to load class names and counts.
+                        </td>
+                      </tr>
+                    ) : (
+                      classes.map((r) => (
+                        <tr key={r.name}>
+                          <td>{r.name}</td>
+                          <td>{r.imageCount}</td>
+                          <td>
+                            <input
+                              type="number"
+                              value={r.target}
+                              onChange={(e) =>
+                                setRowTarget(r.name, Number(e.target.value))
+                              }
+                              style={{
+                                width: 120,
+                                height: 32,
+                                borderRadius: 8,
+                                border: "none",
+                                paddingLeft: 10,
+                                boxShadow:
+                                  "0px 3px 13px 0px rgba(89, 89, 89, 0.1)",
+                              }}
+                            />
+                          </td>
+                          <td>{r.available != null ? r.available : "—"}</td>
+                          <td
+                            style={{
+                              color:
+                                r.shortfall && r.shortfall > 0
+                                  ? "#c0392b"
+                                  : "#7f8c8d",
+                              fontWeight:
+                                r.shortfall && r.shortfall > 0 ? 600 : 400,
+                            }}
+                          >
+                            {r.shortfall != null ? r.shortfall : "—"}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </ClassTable>
+              </TableWrap>
             </AugProgressSection>
           </InputsProgressContainer>
 
@@ -914,4 +931,4 @@ const Enhanced: React.FunctionComponent = () => {
   );
 };
 
-export default Enhanced;
+export default EnhancedClassSpecific;

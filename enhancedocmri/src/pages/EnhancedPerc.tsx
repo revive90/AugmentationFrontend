@@ -14,6 +14,7 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/100.css";
 
+// =================== styled components ===================
 const MainPage = styled.div`
   font-family: "Poppins", sans-serif;
   width: 100%;
@@ -22,10 +23,6 @@ const MainPage = styled.div`
   flex-direction: row;
   background-color: #eaf0f7;
 `;
-//  background-color: #eaf0f7;
-
-//  background-color: #4723da;
-
 const SideNavMenu = styled.div`
   min-width: 250px;
   width: 20%;
@@ -358,13 +355,6 @@ const TimeLabel = styled.p`
   padding-bottom: 5px;
   border-radius: 10px;
 `;
-const TimerR = styled(Hourglass)`
-  width: 30px;
-  height: 30px;
-  color: #8c8d91ff;
-  margin-left: 40px;
-  align-self: center;
-`;
 const TimeInSec = styled.p`
   font-size: 2em;
   color: #222222ff;
@@ -410,13 +400,6 @@ const RamLabel = styled.p`
   padding-top: 5px;
   padding-bottom: 5px;
   border-radius: 10px;
-`;
-const RamR = styled(CpuIcon)`
-  width: 30px;
-  height: 30px;
-  color: #8c8d91ff;
-  margin-left: 40px;
-  align-self: center;
 `;
 const RamInMB = styled.p`
   font-size: 2em;
@@ -473,10 +456,8 @@ const ImageCount = styled.p`
   color: #4566ea;
   font-weight: 600;
   font-family: "roboto", sans-serif;
-  align-self: center;
 `;
 
-// --------------------------   TERMINAL  -------------------------------
 const AugTerminalSection = styled.div`
   width: 100%;
   height: 45%;
@@ -505,8 +486,6 @@ const TerminalText = styled.textarea`
   scrollbar-width: 0px;
   scrollbar-color: transparent transparent;
 `;
-//  color: #75f97d;
-
 const ImagesPreviewContainer = styled.div`
   width: 315px;
   height: 97%;
@@ -522,21 +501,18 @@ const Images = styled(SimpleImageSlider)`
   border-radius: 8px;
   object-fit: contain;
 `;
-const SummaryLinkContainer = styled.div`
-  background-color: #000000ff;
-  margin-left: 8px;
-`;
 
-// --------------------------   COMPONENT  -------------------------------
-const Baseline: React.FunctionComponent = () => {
+// =================== component ===================
+const EnhancedPerc: React.FunctionComponent = () => {
+  // terminal + autoscroll
   const terminalRef = useRef<HTMLTextAreaElement>(null);
   const [terminalOutput, setTerminalOutput] = useState<string>("");
 
   // live metrics
-  const [progressPercent, setProgressPercent] = useState<number>(0); // now uses overall_progress
-  const [phase, setPhase] = useState<"idle" | "compare" | "fuse">("idle");
+  const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [phase, setPhase] = useState<"idle" | "index" | "augment">("idle");
   const [ramMb, setRamMb] = useState<number>(0);
-  const [imagesGenerated, setImagesGenerated] = useState<number>(0);
+  const [imagesGenerated, setImagesGenerated] = useState<number | null>(null);
 
   // run state + previews
   const [isRunning, setIsRunning] = useState(false);
@@ -546,6 +522,10 @@ const Baseline: React.FunctionComponent = () => {
   // timer (live + final)
   const [elapsedLive, setElapsedLive] = useState<number>(0);
   const [finalElapsedSec, setFinalElapsedSec] = useState<number | null>(null);
+
+  // hidden defaults for thresholds (removed from UI)
+  const DEFAULT_UPPER = 0.99;
+  const DEFAULT_MIN_QUALITY = 0.8;
 
   useEffect(() => {
     if (!isRunning) return;
@@ -560,31 +540,29 @@ const Baseline: React.FunctionComponent = () => {
     }
   }, [terminalOutput]);
 
-  interface AugmentationParams {
+  // -------- form state: Target % mode ----------
+  interface PercentageParams {
     ROOT_DATASET_DIR: string;
-    MAIN_OUTPUT_DIR: string;
-    INITIAL_TH1: number | "";
-    INITIAL_TH2: number | "";
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: number | "";
+    AUGMENTED_OUTPUT_DIR: string;
+    AUGMENTATION_TARGET_PERCENTAGE: number | "";
   }
 
-  const [formData, setFormData] = useState<AugmentationParams>({
+  const [formData, setFormData] = useState<PercentageParams>({
     ROOT_DATASET_DIR: "",
-    MAIN_OUTPUT_DIR: "",
-    INITIAL_TH1: "",
-    INITIAL_TH2: "",
-    ACCEPTABLE_DIFFERENCE_PERCENTAGE: "",
+    AUGMENTED_OUTPUT_DIR: "",
+    AUGMENTATION_TARGET_PERCENTAGE: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name as keyof AugmentationParams]:
+      [name as keyof PercentageParams]:
         type === "number" ? (value === "" ? "" : Number(value)) : value,
     }));
   };
 
+  // -------------- streaming run (percentage mode) -----------------
   const startStreamingRun = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -600,20 +578,23 @@ const Baseline: React.FunctionComponent = () => {
 
     const payload = {
       ROOT_DATASET_DIR: String(formData.ROOT_DATASET_DIR),
-      MAIN_OUTPUT_DIR: String(formData.MAIN_OUTPUT_DIR),
-      INITIAL_TH1: Number(formData.INITIAL_TH1),
-      INITIAL_TH2: Number(formData.INITIAL_TH2),
-      ACCEPTABLE_DIFFERENCE_PERCENTAGE: Number(
-        formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE
+      AUGMENTED_OUTPUT_DIR: String(formData.AUGMENTED_OUTPUT_DIR),
+      UPPER_THRESHOLD: DEFAULT_UPPER,
+      MINIMUM_QUALITY_THRESHOLD: DEFAULT_MIN_QUALITY,
+      AUGMENTATION_TARGET_PERCENTAGE: Number(
+        formData.AUGMENTATION_TARGET_PERCENTAGE
       ),
     };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/augment/baseline/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "http://127.0.0.1:8000/augment/enhanced/percentage/stream",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!res.body) {
         setTerminalOutput("No stream body received.");
@@ -639,13 +620,11 @@ const Baseline: React.FunctionComponent = () => {
           buffer = buffer.slice(idx + 1);
 
           if (line.startsWith("[[EVT]]")) {
-            const payload = line.slice(7).trim();
+            const jsonStr = line.slice(7).trim();
             try {
-              const evt = JSON.parse(payload);
+              const evt = JSON.parse(jsonStr);
 
-              if (evt.type === "start") {
-                setPhase("compare");
-              }
+              if (evt.type === "start") setPhase("index");
 
               if (
                 evt.type === "overall_progress" &&
@@ -653,37 +632,28 @@ const Baseline: React.FunctionComponent = () => {
               ) {
                 const clamped = Math.max(0, Math.min(100, evt.percent));
                 setProgressPercent(clamped);
-              }
-
-              if (
-                (evt.type === "compare_progress" ||
-                  evt.type === "fuse_progress") &&
-                evt.phase
-              ) {
-                if (evt.phase === "compare" || evt.phase === "fuse")
+                if (evt.phase === "index" || evt.phase === "augment")
                   setPhase(evt.phase);
               }
 
-              if (evt.type === "heartbeat") {
-                if (typeof evt.rss_mb === "number") setRamMb(evt.rss_mb);
+              if (evt.type === "heartbeat" && typeof evt.rss_mb === "number") {
+                setRamMb(evt.rss_mb);
               }
 
-              if (evt.type === "generated") {
-                if (typeof evt.generated_so_far === "number") {
-                  setImagesGenerated(evt.generated_so_far);
-                }
+              if (
+                evt.type === "generated" &&
+                typeof evt.total_generated === "number"
+              ) {
+                setImagesGenerated(evt.total_generated);
               }
 
               if (evt.type === "done") {
                 setProgressPercent(100);
-                if (typeof evt.elapsed_seconds === "number") {
+                if (typeof evt.elapsed_seconds === "number")
                   setFinalElapsedSec(evt.elapsed_seconds);
-                }
                 setPhase("idle");
               }
-            } catch {
-              // ignore malformed
-            }
+            } catch {}
             continue;
           }
 
@@ -695,6 +665,9 @@ const Baseline: React.FunctionComponent = () => {
                 if (Array.isArray(parsed.samples))
                   setPreviewImages(parsed.samples);
                 if (parsed.summary_url) setSummaryLink(parsed.summary_url);
+                if (typeof parsed.total_generated === "number") {
+                  setImagesGenerated(parsed.total_generated);
+                }
               }
             } catch {}
             continue;
@@ -772,10 +745,10 @@ const Baseline: React.FunctionComponent = () => {
           <InputsProgressContainer>
             <InputsSection>
               <InputsSectionHeader>
-                Baseline Augmentation Setup
+                DINOv2 + FAISS (Target % Mode)
               </InputsSectionHeader>
 
-              <InputLabel>Training Data Folder Path</InputLabel>
+              <InputLabel>Input Data Directory</InputLabel>
               <InputField
                 type="text"
                 name="ROOT_DATASET_DIR"
@@ -783,35 +756,19 @@ const Baseline: React.FunctionComponent = () => {
                 onChange={handleChange}
               />
 
-              <InputLabel>Output Folder Path</InputLabel>
+              <InputLabel>Main Output Directory</InputLabel>
               <InputField
                 type="text"
-                name="MAIN_OUTPUT_DIR"
-                value={formData.MAIN_OUTPUT_DIR || ""}
+                name="AUGMENTED_OUTPUT_DIR"
+                value={formData.AUGMENTED_OUTPUT_DIR || ""}
                 onChange={handleChange}
               />
 
-              <InputLabel>Lower Threshold (Th1)</InputLabel>
+              <InputLabel>% Target of data augmentation</InputLabel>
               <InputField
                 type="number"
-                name="INITIAL_TH1"
-                value={formData.INITIAL_TH1}
-                onChange={handleChange}
-              />
-
-              <InputLabel>Upper Threshold (Th2)</InputLabel>
-              <InputField
-                type="number"
-                name="INITIAL_TH2"
-                value={formData.INITIAL_TH2}
-                onChange={handleChange}
-              />
-
-              <InputLabel>% Tolerance</InputLabel>
-              <InputField
-                type="number"
-                name="ACCEPTABLE_DIFFERENCE_PERCENTAGE"
-                value={formData.ACCEPTABLE_DIFFERENCE_PERCENTAGE}
+                name="AUGMENTATION_TARGET_PERCENTAGE"
+                value={formData.AUGMENTATION_TARGET_PERCENTAGE}
                 onChange={handleChange}
               />
 
@@ -822,7 +779,6 @@ const Baseline: React.FunctionComponent = () => {
               >
                 {isRunning ? "RUNNING..." : "START"}
               </ProceedButton>
-
               <StopButton>STOP</StopButton>
             </InputsSection>
 
@@ -833,7 +789,7 @@ const Baseline: React.FunctionComponent = () => {
                   <AugProgressChart
                     type="circle"
                     percent={Math.round(progressPercent)}
-                    size={160}
+                    size={120}
                   />
                 </AugUpperSectionLeft>
                 <AugUpperSectionRight>
@@ -842,10 +798,10 @@ const Baseline: React.FunctionComponent = () => {
                     <StatusIndicatorBarRunningDot />
                     <StatusIndicatorBarRunningText>
                       {isRunning
-                        ? phase === "compare"
-                          ? "Comparing ..."
-                          : phase === "fuse"
-                          ? "Fusing ..."
+                        ? phase === "index"
+                          ? "Indexing ..."
+                          : phase === "augment"
+                          ? "Augmenting ..."
                           : "Running ..."
                         : "Idle"}
                     </StatusIndicatorBarRunningText>
@@ -887,7 +843,7 @@ const Baseline: React.FunctionComponent = () => {
 
                 <AugLowerSectionRight>
                   <ImageCountHeading>New Images Generated</ImageCountHeading>
-                  <ImageCount>{imagesGenerated || "—"}</ImageCount>
+                  <ImageCount>{imagesGenerated ?? "—"}</ImageCount>
                   <Stack spacing={3} direction="row" alignItems="center">
                     {isRunning && <CircularProgress size="1rem" />}
                   </Stack>
@@ -922,6 +878,7 @@ const Baseline: React.FunctionComponent = () => {
                   No images yet
                 </p>
               )}
+
               {summaryLink && (
                 <a
                   href={`http://127.0.0.1:8000${summaryLink}`}
@@ -946,4 +903,4 @@ const Baseline: React.FunctionComponent = () => {
   );
 };
 
-export default Baseline;
+export default EnhancedPerc;

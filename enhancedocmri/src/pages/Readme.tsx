@@ -15,7 +15,6 @@ import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import "@fontsource/roboto/100.css";
 
-// ---------- layout + styled bits (unchanged from yours) ----------
 const MainPage = styled.div`
   font-family: "Poppins", sans-serif;
   width: 100%;
