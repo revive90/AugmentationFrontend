@@ -1,14 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import styled from "styled-components";
 import "../index.css";
 import { Link } from "react-router-dom";
-import Enhanced from "./Enhanced";
-import { Hourglass, CpuIcon } from "lucide-react";
-import { Progress } from "antd";
-import Stack from "@mui/material/Stack";
-import CircularProgress from "@mui/material/CircularProgress";
-import SimpleImageSlider from "react-simple-image-slider";
-
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -23,10 +16,6 @@ const MainPage = styled.div`
   flex-direction: row;
   background-color: #eaf0f7;
 `;
-//  background-color: #eaf0f7;
-
-//  background-color: #4723da;
-
 const SideNavMenu = styled.div`
   min-width: 250px;
   width: 20%;
@@ -61,7 +50,7 @@ const MenuItem = styled.li`
   font-size: 1.2em;
   &:hover {
     color: rgb(165, 194, 231);
-    transform: scale(1.06);
+    transform: scale(1.02);
     transition: 0.1s ease-in-out;
   }
 `;
@@ -75,7 +64,7 @@ const ReloadButton = styled.li`
   font-size: 1.2em;
   &:hover {
     color: rgb(252, 160, 137);
-    transform: scale(1.25);
+    transform: scale(1.02);
     transition: 0.1s ease-in-out;
   }
 `;
@@ -172,21 +161,39 @@ const Readme: React.FunctionComponent = () => {
         <SideNavMenu>
           <NavLogo>Enhanced OCMRI</NavLogo>
           <ul>
-            <NavSubMenuHeader>AUGMENTATION</NavSubMenuHeader>
+            <NavSubMenuHeader>Baseline</NavSubMenuHeader>
+
             <MenuItem>
               <Link
                 to="/Baseline"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Baseline
+                Original OCMRI
+              </Link>
+            </MenuItem>
+            <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
+            <MenuItem>
+              <Link
+                to="/Enhanced-Threshold-Based"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Threshold Based
               </Link>
             </MenuItem>
             <MenuItem>
               <Link
-                to="/Enhanced"
+                to="/Enhanced-Target-Percentage"
                 style={{ textDecoration: "none", color: "inherit" }}
               >
-                Enhanced
+                Target % Based
+              </Link>
+            </MenuItem>
+            <MenuItem>
+              <Link
+                to="/Enhanced-Class-Specific"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Class Specific
               </Link>
             </MenuItem>
             <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
@@ -210,8 +217,9 @@ const Readme: React.FunctionComponent = () => {
               <ManualSub>
                 Run and monitor dataset augmentation with either the{" "}
                 <strong>Baseline (MSE)</strong> method or the{" "}
-                <strong>Enhanced (DINOv2 + Faiss)</strong> method. This page
-                explains inputs, controls, live metrics, and outputs.
+                <strong>Enhanced (DINOv2 + FAISS)</strong> modes. This page
+                explains inputs, controls, live metrics, and outputs for
+                Threshold-Based, Target-Percentage, and Class-Specific runs.
               </ManualSub>
 
               <Divider />
@@ -221,12 +229,21 @@ const Readme: React.FunctionComponent = () => {
                 <List>
                   <li>Use the left menu to switch pages:</li>
                   <li>
-                    <strong>Baseline Method</strong> — Original MSE-based OCMRI
+                    <strong>Baseline Method</strong> — Original MSE-driven
                     augmentation.
                   </li>
                   <li>
-                    <strong>Enhanced Method</strong> — Proposed DINOv2 + Faiss
-                    augmentation pipeline.
+                    <strong>Enhanced — Threshold Based</strong> — Generate
+                    fusions whose DINOv2 similarity falls within a specified
+                    band.
+                  </li>
+                  <li>
+                    <strong>Enhanced — Target % Based</strong> — Grow each class
+                    by a global percentage target (e.g. +300%).
+                  </li>
+                  <li>
+                    <strong>Enhanced — Class Specific</strong> — Set exact
+                    target counts per class (scan classes, edit targets, run).
                   </li>
                   <li>
                     <strong>User Manual</strong> — This help guide.
@@ -238,148 +255,199 @@ const Readme: React.FunctionComponent = () => {
                 <H2>2) Baseline Method — Inputs</H2>
                 <List>
                   <li>
-                    <strong>Input Data Directory</strong> — Root folder of your
-                    training images, grouped by class (one folder per class).
-                  </li>
-                  <li>
-                    <strong>Main Output Directory</strong> — Where augmented
-                    images will be written (class folders are created
-                    automatically).
-                  </li>
-                  <li>
-                    <strong>Lower Threshold (TH1)</strong> — MSE lower bound
-                    used in pairing/fusion.
-                  </li>
-                  <li>
-                    <strong>Upper Threshold (TH2)</strong> — MSE upper bound;
-                    controls how similar pairs can be.
-                  </li>
-                  <li>
-                    <strong>% Tolerance</strong> — Acceptable difference from
-                    target image counts when tuning thresholds.
-                  </li>
-                </List>
-              </Section>
-
-              <Section>
-                <H2>3) Enhanced Method — Inputs</H2>
-                <List>
-                  <li>
-                    <strong>Input Data Directory</strong> — Root folder of your
-                    training images, grouped by class.
+                    <strong>Input Data Directory</strong> — Root folder of
+                    training images organized in subfolders by class.
                   </li>
                   <li>
                     <strong>Main Output Directory</strong> — Destination for
-                    generated images (class folders created automatically).
+                    generated images (class subfolders will be created).
                   </li>
                   <li>
-                    <strong>Upper Threshold (0–1)</strong> — Max cosine
-                    similarity cutoff for valid pairs.
+                    <strong>TH1 / TH2 (MSE)</strong> — Lower/upper MSE bounds
+                    used to pair images.
                   </li>
                   <li>
-                    <strong>Lower Threshold / Min Quality (0–1)</strong> —
-                    Minimum similarity quality for pairs.
-                  </li>
-                  <li>
-                    <strong>% Target of Data Augmentation</strong> — Controls
-                    how many images to generate relative to originals.
+                    <strong>% Tolerance</strong> — Acceptable deviation when the
+                    baseline script tunes thresholds toward the target.
                   </li>
                 </List>
               </Section>
 
               <Section>
-                <H2>4) Running an Augmentation</H2>
-                <List>
-                  <li>Enter all required fields on the chosen method page.</li>
-                  <li>
-                    Click <strong>START</strong> to begin. The backend starts
-                    immediately and streams logs.
-                  </li>
-                  <li>
-                    To reset the UI at any time, click{" "}
-                    <strong>Reload All</strong> in the side menu or press{" "}
-                    <Kbd>Ctrl</Kbd> + <Kbd>R</Kbd>.
-                  </li>
-                </List>
-              </Section>
-
-              <Section>
-                <H2>5) Live Status &amp; Metrics</H2>
+                <H2>3) Enhanced — Threshold Based</H2>
                 <List>
                   <li>
-                    <strong>Progress Ring</strong> — Overall completion
-                    percentage.
+                    <strong>Input Data Directory</strong> — Root folder grouped
+                    by class.
                   </li>
                   <li>
-                    <strong>Status</strong> — Shows the active phase (e.g.,
-                    “Indexing”, “Augmenting”) or idle.
+                    <strong>Main Output Directory</strong> — Where fusions are
+                    saved (per-class).
                   </li>
                   <li>
-                    <strong>Timer</strong> — Live elapsed time while running;
-                    freezes at final time on completion.
+                    <strong>Lower Threshold (0–1)</strong> — Minimum cosine
+                    similarity for valid pairs.
                   </li>
                   <li>
-                    <strong>RAM Usage</strong> — Current RSS memory from the
-                    backend; peak usage is written to the summary file.
+                    <strong>Upper Threshold (0–1)</strong> — Maximum cosine
+                    similarity for valid pairs.
                   </li>
                   <li>
-                    <strong>New Images Generated</strong> — Increments as fusion
-                    completes; shows a global total (Enhanced) or per-phase
-                    (Baseline).
-                  </li>
-                  <li>
-                    <strong>Terminal Output</strong> — Full backend logs
-                    (including structured <code>[[EVT]]</code> events).
-                  </li>
-                  <li>
-                    <strong>Preview Panel</strong> — Rotating sample of
-                    generated images once available.
-                  </li>
-                  <li>
-                    <strong>Summary Link</strong> — Click to open the run
-                    summary (time, memory, counts), saved under{" "}
-                    <code>augmentation_results</code>.
+                    Use when you want strict control over pair similarity
+                    quality.
                   </li>
                 </List>
               </Section>
 
               <Section>
-                <H2>6) Expected Outputs</H2>
+                <H2>4) Enhanced — Target % Based</H2>
+                <List>
+                  <li>
+                    <strong>Input Data Directory</strong> — Root folder grouped
+                    by class.
+                  </li>
+                  <li>
+                    <strong>Main Output Directory</strong> — Destination for
+                    generated images.
+                  </li>
+                  <li>
+                    <strong>Target %</strong> — How many images to generate
+                    relative to each class’s original count (e.g., 300 = grow to
+                    300% of original).
+                  </li>
+                  <li>
+                    No per-class editing here; the percentage applies to all
+                    classes uniformly.
+                  </li>
+                </List>
+              </Section>
+
+              <Section>
+                <H2>5) Enhanced — Class Specific</H2>
+                <List>
+                  <li>
+                    <strong>Input Data Directory</strong> — Root folder grouped
+                    by class.
+                  </li>
+                  <li>
+                    <strong>Main Output Directory</strong> — Destination for
+                    generated images.
+                  </li>
+                  <li>
+                    <strong>Scan Classes</strong> — Reads class folders and
+                    their image counts from the input directory.
+                  </li>
+                  <li>
+                    <strong>Edit Targets</strong> — Set exact target counts per
+                    class in the table.
+                  </li>
+                  <li>
+                    <strong>Equalize to Largest</strong> — Convenience button to
+                    make all targets equal to the largest existing class.
+                  </li>
+                </List>
+              </Section>
+
+              <Section>
+                <H2>6) Running an Augmentation</H2>
+                <List>
+                  <li>
+                    Enter the required fields for the chosen page/mode, then
+                    click <strong>START</strong>.
+                  </li>
+                  <li>
+                    The backend streams logs live to the terminal panel and the
+                    UI updates progress, RAM, and generated counts.
+                  </li>
+                  <li>
+                    Click <strong>Reload All</strong> (left menu) or press{" "}
+                    <Kbd>Ctrl</Kbd> + <Kbd>R</Kbd> to reset the UI.
+                  </li>
+                </List>
+              </Section>
+
+              <Section>
+                <H2>7) Live Status &amp; Metrics</H2>
+                <List>
+                  <li>
+                    <strong>Progress Ring</strong> — Overall completion.
+                  </li>
+                  <li>
+                    <strong>Status</strong> — Active phase: “Indexing” (feature
+                    extraction / FAISS) or “Augmenting”.
+                  </li>
+                  <li>
+                    <strong>Timer</strong> — Live elapsed time; freezes on
+                    completion.
+                  </li>
+                  <li>
+                    <strong>RAM Usage</strong> — Live RSS (MB) from the backend;
+                    peak memory is recorded in the summary.
+                  </li>
+                  <li>
+                    <strong>New Images Generated</strong> — Live counter of
+                    fused images created during the run.
+                  </li>
+                  <li>
+                    <strong>Terminal Output</strong> — Streams backend logs
+                    including structured events like <code>[[EVT]]</code>{" "}
+                    (progress, heartbeat, generated, done).
+                  </li>
+                  <li>
+                    <strong>Preview Panel</strong> — Shows a rotating sample of
+                    generated images when available.
+                  </li>
+                  <li>
+                    <strong>Summary Link</strong> — Opens the saved summary file
+                    under <code>augmentation_results</code>.
+                  </li>
+                </List>
+              </Section>
+
+              <Section>
+                <H2>8) Expected Outputs</H2>
                 <List>
                   <li>
                     <strong>Augmented Images</strong> — Written to the chosen
-                    output directory under class subfolders.
+                    output dir in per-class subfolders.
                   </li>
                   <li>
-                    <strong>Summary File</strong> — Text file with total images
-                    generated, peak memory usage, and total execution time.
+                    <strong>Run Summary (.txt)</strong> — Includes timings, peak
+                    memory, final totals, and per-class details (varies by
+                    mode).
                   </li>
                   <li>
-                    <strong>Optional Previews</strong> — A small, round-robin
-                    selection is displayed in the UI after the run.
+                    <strong>FAISS Indexes</strong> — Created internally for the
+                    Enhanced modes to accelerate similarity lookups.
                   </li>
                 </List>
               </Section>
 
               <Section>
-                <H2>7) Tips &amp; Troubleshooting</H2>
+                <H2>9) Tips &amp; Troubleshooting</H2>
                 <List>
                   <li>
-                    <strong>Directory Access</strong> — Use folders you have
-                    write permissions for (avoid protected system paths).
+                    <strong>Backend Running</strong> — Start with{" "}
+                    <code>uvicorn server:app --reload</code>. If a page shows no
+                    logs, check server console for errors.
                   </li>
                   <li>
-                    <strong>Threshold Ranges</strong> — For Enhanced, keep
-                    values in <code>[0.00, 1.00]</code>; for Baseline, use
-                    sensible MSE ranges per your dataset.
+                    <strong>Paths</strong> — Use directories you can read/write.
+                    Avoid protected system folders.
                   </li>
                   <li>
-                    <strong>Streaming</strong> — If logs stop, check the
-                    terminal where the backend is running for Python errors.
+                    <strong>Restart Helps</strong> — If a new endpoint (e.g.,
+                    “Scan Classes”) 404s after code changes, restart the server.
                   </li>
                   <li>
-                    <strong>Performance</strong> — Enhanced method is faster but
-                    uses more RAM; ensure enough memory for large datasets.
+                    <strong>Large Datasets</strong> — Enhanced modes are faster
+                    but can be memory-intensive. Ensure enough RAM and disk
+                    space.
+                  </li>
+                  <li>
+                    <strong>Class-Specific Planning</strong> — Use “Plan
+                    Targets” to visualize availability/shortfall before
+                    running—then “Clamp to Available” if needed.
                   </li>
                 </List>
               </Section>
@@ -387,9 +455,9 @@ const Readme: React.FunctionComponent = () => {
               <Divider />
 
               <P style={{ fontSize: "0.95rem", color: "#6c7aa0" }}>
-                Verify your backend is running (
-                <code>uvicorn server:app --reload</code>), double-check paths,
-                and review the streamed logs for clues.
+                If something isn't working right, verify your paths, restart the
+                backend, and inspect the streamed logs for any Python errors or
+                bad arguments.
               </P>
             </ManualCard>
           </ManualContainer>

@@ -58,7 +58,7 @@ const MenuItem = styled.li`
   font-size: 1.2em;
   &:hover {
     color: rgb(165, 194, 231);
-    transform: scale(1.06);
+    transform: scale(1.02);
     transition: 0.1s ease-in-out;
   }
 `;
@@ -72,7 +72,7 @@ const ReloadButton = styled.li`
   font-size: 1.2em;
   &:hover {
     color: rgb(252, 160, 137);
-    transform: scale(1.25);
+    transform: scale(1.02);
     transition: 0.1s ease-in-out;
   }
 `;
@@ -480,7 +480,7 @@ const TerminalText = styled.textarea`
   height: 80%;
   color: #6a86f5ff;
   font-family: "Cascadia Mono", Courier, monospace;
-  font-size: 1.2em;
+  font-size: 1.1em;
   background-color: transparent;
   margin-left: 40px;
   border: none;
@@ -687,52 +687,55 @@ const Enhanced: React.FunctionComponent = () => {
       <MainPage>
         <SideNavMenu>
           <NavLogo>Enhanced OCMRI</NavLogo>
-          <NavSubMenuHeader>Baseline</NavSubMenuHeader>
-          <MenuItem>
-            <Link
-              to="/Baseline"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Original OCMRI
-            </Link>
-          </MenuItem>
-          <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
-          <MenuItem>
-            <Link
-              to="/Enhanced-Threshold-Based"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Threshold Based
-            </Link>
-          </MenuItem>
-          <MenuItem>
-            <Link
-              to="/Enhanced-Target-Percentage"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Target % Based
-            </Link>
-          </MenuItem>
-          <MenuItem>
-            <Link
-              to="/Enhanced-Class-Specific"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Class Specific
-            </Link>
-          </MenuItem>
-          <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
-          <MenuItem>
-            <Link
-              to="/Readme"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              User Manual
-            </Link>
-          </MenuItem>
-          <ReloadButton onClick={() => window.location.reload()}>
-            Reload All
-          </ReloadButton>
+          <ul>
+            <NavSubMenuHeader>Baseline</NavSubMenuHeader>
+
+            <MenuItem>
+              <Link
+                to="/Baseline"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Original OCMRI
+              </Link>
+            </MenuItem>
+            <NavSubMenuHeader>Enhanced OCMRI</NavSubMenuHeader>
+            <MenuItem>
+              <Link
+                to="/Enhanced-Threshold-Based"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Threshold Based
+              </Link>
+            </MenuItem>
+            <MenuItem>
+              <Link
+                to="/Enhanced-Target-Percentage"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Target % Based
+              </Link>
+            </MenuItem>
+            <MenuItem>
+              <Link
+                to="/Enhanced-Class-Specific"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Class Specific
+              </Link>
+            </MenuItem>
+            <NavSubMenuHeader>ABOUT</NavSubMenuHeader>
+            <MenuItem>
+              <Link
+                to="/Readme"
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                User Manual
+              </Link>
+            </MenuItem>
+            <ReloadButton onClick={() => window.location.reload()}>
+              Reload All
+            </ReloadButton>
+          </ul>
         </SideNavMenu>
 
         <MainContentPane>
